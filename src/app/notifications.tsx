@@ -107,7 +107,7 @@ export default function NotificationsScreen() {
                 <Text>Title: {notification && notification.request.content.title} </Text>
                 <Text>Body: {notification && notification.request.content.body}</Text>
                 <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
-            </View>s
+            </View>
             <Button
                 title="Press to Send Notification"
                 onPress={async () => {
