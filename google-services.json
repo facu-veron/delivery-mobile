@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "241225534309",
+    "project_id": "sysdelivery-7a978",
+    "storage_bucket": "sysdelivery-7a978.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241225534309:android:a09253b87a50c3893fef8c",
+        "android_client_info": {
+          "package_name": "com.facuveron.deliverymobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6agIXvtKXX_0-HUOgD4d-0lAMdqYZDdA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
