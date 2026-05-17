@@ -63,6 +63,19 @@ Real-time order status uses **5-second polling** (React Query `refetchInterval`)
 @/assets/*  → assets/*
 ```
 
+## Estado de implementación
+
+### Fase 1 — Completa ✓
+- **Design system:** `tailwind.config.js` con los tokens de color del tema DeliverYa (hex equivalentes de oklch de la web). Los colores semánticos siguen el mismo naming que la web: `primary`, `secondary`, `accent`, `muted`, `card`, `destructive`, `success`, `warning`, `border`.
+- **Dark mode:** variantes `*-dark` en el config (`bg-card dark:bg-card-dark`). `darkMode: 'media'` — responde automáticamente al sistema.
+- **Primitivos shared:** `Button`, `Card`, `Badge`, `LoadingSpinner`, `ErrorMessage` en `src/shared/components/`.
+- **Infraestructura:** `src/config/env.ts` (Zod), `src/shared/api/client.ts` (Axios + SuperTokens), `src/shared/api/query-client.ts`, `src/shared/types/pedido.types.ts` (enums espejo del backend).
+- **Auth store:** `src/features/auth/store/auth.store.ts` (Zustand v5).
+- **Root layout:** `src/app/_layout.tsx` con `QueryClientProvider`, `SafeAreaProvider`, `SuperTokens.init`.
+
+### Fases 2-5 — Pendientes
+Ver plan de fases completo en la conversación.
+
 ## Key Design Decisions (from PRD)
 
 - `supertokens-react-native` is available but JWT via Axios interceptors is the planned auth approach

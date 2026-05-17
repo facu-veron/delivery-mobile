@@ -1,26 +1,35 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#251E14',
+    background: '#FEFAF4',
+    backgroundElement: '#F1EDE5',
+    backgroundSelected: '#E6E1D8',
+    textSecondary: '#6A6052',
+    primary: '#EEC234',
+    accent: '#D06A35',
+    success: '#25A05A',
+    warning: '#DFB030',
+    destructive: '#C13D2A',
+    card: '#FFFFFF',
+    border: '#E6E1D8',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F4F0EB',
+    background: '#1E1910',
+    backgroundElement: '#31271B',
+    backgroundSelected: '#3D3428',
+    textSecondary: '#9E9891',
+    primary: '#EEC234',
+    accent: '#D06A35',
+    success: '#1F8444',
+    warning: '#C29420',
+    destructive: '#9E2B1F',
+    card: '#261E14',
+    border: '#3D3428',
   },
 } as const;
 
@@ -28,13 +37,9 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -44,9 +49,9 @@ export const Fonts = Platform.select({
     mono: 'monospace',
   },
   web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
+    sans: 'var(--font-sans)',
+    serif: 'serif',
+    rounded: 'normal',
     mono: 'var(--font-mono)',
   },
 });
