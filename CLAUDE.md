@@ -73,8 +73,19 @@ Real-time order status uses **5-second polling** (React Query `refetchInterval`)
 - **Auth store:** `src/features/auth/store/auth.store.ts` (Zustand v5).
 - **Root layout:** `src/app/_layout.tsx` con `QueryClientProvider`, `SafeAreaProvider`, `SuperTokens.init`.
 
-### Fases 2-5 — Pendientes
-Ver plan de fases completo en la conversación.
+### Fase 2 — Completa ✓
+- **Routing por rol:** `index.tsx` hidrata el store con `useSession` (SuperTokens) → redirect a `(cliente)` o `(repartidor)` según rol.
+- **Guards:** `(cliente)/_layout.tsx` y `(repartidor)/_layout.tsx` validan `isAuthenticated` + `rol` antes de renderizar.
+- **Auth feature:** esquemas Zod, API (`authApi`), hooks (`useLogin`, `useLogout`, `useSession`), store Zustand.
+- **Pantallas:** `(auth)/login.tsx`, `(auth)/registro.tsx` (2 pasos: selector de rol → formulario). Usan RHF + Zod + tokens del tema via NativeWind.
+- **Push registration:** `usePushRegistration` corre en background post-login/registro.
+- **Componentes nuevos:** `Input` (con label + error), `Button` (ya existía desde Fase 1).
+- **Template limpiado:** borrados todos los archivos del starter de Expo (app-tabs, themed-text, animated-icon, etc).
+
+### Fases 3-5 — Pendientes
+- Fase 3: Experiencia repartidor (tabs, disponibilidad, pedidos, SSE, documentos).
+- Fase 4: Experiencia cliente (comercios, pedido libre, catálogo, seguimiento).
+- Fase 5: Polish, dark mode, historial, animaciones, build producción.
 
 ## Key Design Decisions (from PRD)
 
