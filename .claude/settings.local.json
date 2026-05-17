@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git check-ignore *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('lockfileVersion check - package.json version:', d.get\\('version','N/A'\\)\\)\")",
+      "Bash(git ls-tree *)"
+    ]
+  }
+}
