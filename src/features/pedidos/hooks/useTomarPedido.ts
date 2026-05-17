@@ -12,6 +12,7 @@ export function useTomarPedido() {
     mutationFn: (id: string) => pedidosApi.tomar(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['pedidos', 'disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['repartidor', 'pedido-activo'] });
       router.push(`/(repartidor)/pedido/${id}` as any);
     },
     onError: (error: any) => {

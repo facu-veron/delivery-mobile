@@ -6,8 +6,7 @@ import { esPedidoTerminado } from '../utils/transiciones-estado';
 export function usePedidoDetalle(id: string) {
   return useQuery({
     queryKey: ['pedido', id],
-    queryFn: () => pedidosApi.getDetalle(id),
-    select: (res) => res.data,
+    queryFn: () => pedidosApi.getDetalle(id).then((res) => res.data),
     // Polling: se detiene automáticamente cuando el pedido termina
     refetchInterval: (query) => {
       const estado = query.state.data?.estado;

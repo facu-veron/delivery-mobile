@@ -29,6 +29,7 @@
     "plugins": [
       "expo-notifications",
       "expo-router",
+      "expo-image-picker",
       [
         "expo-splash-screen",
         {

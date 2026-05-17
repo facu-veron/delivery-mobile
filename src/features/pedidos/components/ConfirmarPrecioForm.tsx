@@ -22,7 +22,7 @@ export function ConfirmarPrecioForm({ pedidoId, precioEstimado }: Props) {
   const { mutate, isPending } = useConfirmarPrecio(pedidoId);
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
   });
 
   return (

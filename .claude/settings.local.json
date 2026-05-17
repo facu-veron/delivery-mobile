@@ -3,7 +3,14 @@
     "allow": [
       "Bash(git check-ignore *)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('lockfileVersion check - package.json version:', d.get\\('version','N/A'\\)\\)\")",
-      "Bash(git ls-tree *)"
+      "Bash(git ls-tree *)",
+      "Bash(node -e \"const { z } = require\\('zod'\\); const s = z.coerce.number\\(\\).positive\\(\\).optional\\(\\); const r = s.safeParse\\(''\\); console.log\\(JSON.stringify\\(r\\)\\); const r2 = s.safeParse\\('5000'\\); console.log\\(JSON.stringify\\(r2\\)\\); const r3 = s.safeParse\\(undefined\\); console.log\\(JSON.stringify\\(r3\\)\\);\")",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/zod/package.json'\\).version\\)\")",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); const deps = {...pkg.dependencies, ...pkg.devDependencies}; ['expo-image-picker','expo-haptics','expo-file-system','react-native-sse'].forEach\\(p => console.log\\(p, deps[p] || 'NOT INSTALLED'\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); const deps = {...pkg.dependencies, ...pkg.devDependencies}; Object.keys\\(deps\\).filter\\(k => k.startsWith\\('expo'\\)\\).sort\\(\\).forEach\\(k => console.log\\(k, deps[k]\\)\\)\")",
+      "Bash(npx expo *)",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('image-picker:', pkg.dependencies['expo-image-picker']\\); console.log\\('haptics:', pkg.dependencies['expo-haptics']\\)\")"
     ]
   }
 }

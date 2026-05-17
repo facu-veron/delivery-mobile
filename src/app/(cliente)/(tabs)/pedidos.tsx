@@ -1,20 +1,37 @@
+import { useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { usePedidosActivos } from '@/features/cliente/hooks/usePedidosActivos';
 import { EstadoBadge } from '@/features/pedidos/components/EstadoBadge';
-import { useHistorialRepartidor } from '@/features/repartidor/hooks/useHistorialRepartidor';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { formatARS, formatDateTime } from '@/shared/lib/formatters';
 import { Pedido, TipoPedido } from '@/shared/types/pedido.types';
 
-export default function HistorialRepartidorScreen() {
+export default function PedidosClienteScreen() {
   const router = useRouter();
-  const { data: pedidos, isLoading, isError, refetch, isRefetching } = useHistorialRepartidor();
+  const queryClient = useQueryClient();
+  const { data: pedidos, isLoading, isError, refetch, isRefetching } = usePedidosActivos();
+
+  // Push notification handler: AVISAR_CLIENTE
+  useEffect(() => {
+    const sub = Notifications.addNotificationReceivedListener((notification) => {
+      const tipo = notification.request.content.data?.tipo;
+      if (tipo === 'AVISAR_CLIENTE') {
+        queryClient.invalidateQueries({ queryKey: ['pedidos', 'activos', 'cliente'] });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+    });
+    return () => sub.remove();
+  }, [queryClient]);
 
   if (isLoading) return <LoadingSpinner />;
-  if (isError) return <ErrorMessage message="No se pudo cargar el historial." />;
+  if (isError) return <ErrorMessage message="No se pudieron cargar los pedidos." />;
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
@@ -27,21 +44,16 @@ export default function HistorialRepartidorScreen() {
         ListHeaderComponent={
           <View className="px-4 pt-4 pb-3">
             <Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
-              Historial
+              Mis pedidos
             </Text>
-            {pedidos && pedidos.length > 0 && (
-              <Text className="text-sm text-muted-foreground dark:text-muted-dark-foreground mt-1">
-                {pedidos.length} entrega{pedidos.length !== 1 ? 's' : ''}
-              </Text>
-            )}
           </View>
         }
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => router.push(`/(repartidor)/pedido/${item.id}` as any)}
+            onPress={() => router.push(`/(cliente)/pedido/${item.id}` as any)}
             className="mx-4 mb-3 bg-card dark:bg-card-dark rounded-xl p-4 border border-border dark:border-border-dark active:opacity-75"
           >
-            <View className="flex-row items-start justify-between mb-1">
+            <View className="flex-row items-start justify-between mb-2">
               <Text className="text-sm font-semibold text-foreground dark:text-card-dark-foreground flex-1 mr-2">
                 {item.tipo === TipoPedido.LIBRE
                   ? item.localNombre ?? 'Pedido libre'
@@ -50,26 +62,23 @@ export default function HistorialRepartidorScreen() {
               <EstadoBadge estado={item.estado} />
             </View>
             <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">
-              📍 {item.localDireccion}
-            </Text>
-            <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">
-              🏠 {item.clienteDireccion}
+              Entrega en: {item.clienteDireccion}
             </Text>
             <View className="flex-row justify-between items-center mt-2">
               <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">
                 {formatDateTime(item.createdAt)}
               </Text>
               <Text className="text-sm font-bold text-primary">
-                {formatARS(item.costoEnvio)}
+                {formatARS(item.montoTotal)}
               </Text>
             </View>
           </Pressable>
         )}
         ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-24 gap-3">
-            <Text className="text-4xl">📋</Text>
-            <Text className="text-base text-muted-foreground dark:text-muted-dark-foreground text-center">
-              Todavía no tenés entregas completadas.
+          <View className="flex-1 items-center justify-center py-20 gap-3">
+            <Text className="text-4xl">📦</Text>
+            <Text className="text-muted-foreground dark:text-muted-dark-foreground text-center">
+              No tenés pedidos activos.
             </Text>
           </View>
         }

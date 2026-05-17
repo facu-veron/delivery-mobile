@@ -82,10 +82,44 @@ Real-time order status uses **5-second polling** (React Query `refetchInterval`)
 - **Componentes nuevos:** `Input` (con label + error), `Button` (ya existía desde Fase 1).
 - **Template limpiado:** borrados todos los archivos del starter de Expo (app-tabs, themed-text, animated-icon, etc).
 
-### Fases 3-5 — Pendientes
-- Fase 3: Experiencia repartidor (tabs, disponibilidad, pedidos, SSE, documentos).
-- Fase 4: Experiencia cliente (comercios, pedido libre, catálogo, seguimiento).
-- Fase 5: Polish, dark mode, historial, animaciones, build producción.
+### Fase 3 — Completa ✓
+- **Tab navigator repartidor:** `(repartidor)/(tabs)/` — Disponibles, En curso (activo), Historial, Perfil. Listener de push `NUEVO_PEDIDO` invalida la lista.
+- **Disponibilidad:** `DisponibilidadSwitch` con update optimista y rollback en error. Zustand store `useDisponibilidadStore`.
+- **Lista de pedidos disponibles:** `usePedidosDisponibles` con polling 10s, pull-to-refresh, tarjetas con tipo/estado/monto.
+- **Detalle de pedido:** `/(repartidor)/pedido/[id]` con polling 5s (se auto-detiene en estado terminal), `AccionesPedido`, `ConfirmarPrecioForm`.
+- **Acciones por estado:** `transiciones-estado.ts` — confirmar-precio (LIBRE+ASIGNADO), en-camino, entregar, avisar-cliente.
+- **Perfil:** `usePerfil`, badge `EstadoAprobacion`, link a documentos, logout.
+- **Documentos:** pantalla con 5 tipos de documento, estados mock (upload en Fase 5).
+
+### Fase 4 — Completa ✓
+- **Tab navigator cliente:** `(cliente)/(tabs)/` — Inicio (🏪), Mis pedidos (📦), Historial (📋).
+- **Home:** lista de comercios con `useComercios`, CTA "Pedido libre" → `/pedido-libre/nuevo`.
+- **Comercio detalle:** `/(cliente)/comercio/[id]` con categorías/productos, `ProductoCard` con +/− controls, floating cart bar.
+- **Carrito:** `useCarritoStore` (Zustand) — multi-comercio (limpia automáticamente al cambiar de comercio).
+- **Checkout:** `/(cliente)/carrito` — editar cantidades, dirección de entrega, resumen (subtotal + costo envío offline), confirmar.
+- **Pedido libre:** `/(cliente)/pedido-libre/nuevo` con formulario RHF+Zod, preview de costo de envío en vivo.
+- **Costo de envío:** `calcularCostoEnvio(monto)` — `monto < $40.000 → 10%`, `monto ≥ $40.000 → $6.000 fijo`.
+- **Mis pedidos:** polling 10s, handler push `AVISAR_CLIENTE` invalida la lista.
+- **Seguimiento:** `/(cliente)/pedido/[id]` con polling 5s, descripciones de estado por paso, colores semánticos (warning/success/destructive).
+- **Tipos:** `src/shared/types/comercio.types.ts` (Comercio, Producto, CategoriaProductos, ComercioDetalle).
+
+### Fase 5 — Completa ✓
+- **Historial repartidor:** `(repartidor)/(tabs)/historial` — lista real paginada con `useHistorialRepartidor`, navega al detalle del pedido. Invalida cache al `useEntregarPedido`.
+- **Historial cliente:** `(cliente)/(tabs)/historial` — lista con `useHistorialCliente`, muestra monto total + estado badge.
+- **Tab "En curso" repartidor:** ahora muestra el pedido activo en tiempo real (`usePedidoActivo`, polling 5s) con todas las acciones inline. Estado vacío dirige a disponibles.
+- **Upload de documentos:** `documentos.tsx` usa `expo-image-picker` para seleccionar imagen y `FormData` para subir vía `useSubirDocumento`. Estados reales via `useDocumentos`. Muestra motivo de rechazo cuando aplica.
+- **Haptics:** vibración `NotificationFeedbackType.Warning` al recibir push `AVISAR_CLIENTE` en app abierta.
+- **Notification deep-link:** `_layout.tsx` escucha `addNotificationResponseReceivedListener` → navega a `/(repartidor)/pedido/:id` o `/(cliente)/pedido/:id` según rol.
+- **expo-image:** `ComercioCard` usa `expo-image` en lugar de RN `Image` para mejor caché y fade-in.
+- **expo-image-picker plugin:** agregado en `app.json` (requerido para permisos nativos en builds EAS).
+- **Paquetes nuevos:** `expo-image-picker ~55.0.20`, `expo-haptics ~55.0.14` (requieren rebuild EAS).
+
+## Notas de build
+
+Para activar los paquetes nuevos de Fase 5 (`expo-image-picker`, `expo-haptics`), es necesario un rebuild:
+```bash
+eas build --profile development --platform android
+```
 
 ## Key Design Decisions (from PRD)
 

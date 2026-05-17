@@ -12,6 +12,8 @@ export function useEntregarPedido(pedidoId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedido', pedidoId] });
       queryClient.invalidateQueries({ queryKey: ['pedidos', 'disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['repartidor', 'pedido-activo'] });
+      queryClient.invalidateQueries({ queryKey: ['repartidor', 'historial'] });
       router.replace('/(repartidor)/(tabs)/disponibles' as any);
     },
   });
