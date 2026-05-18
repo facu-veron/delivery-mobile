@@ -4,10 +4,15 @@ import type { RegistroClienteInput, RegistroRepartidorInput } from '../schemas/r
 
 export const authApi = {
   login: (data: LoginInput) =>
-    apiClient.post('/auth/signin', data),
+    apiClient.post('/auth/signin', {
+      formFields: [
+        { id: 'email', value: data.email },
+        { id: 'password', value: data.password },
+      ],
+    }),
 
   logout: () =>
-    apiClient.get('/auth/signout'),
+    apiClient.post('/auth/signout'),
 
   registrarCliente: (data: RegistroClienteInput) =>
     apiClient.post('/api/registro/cliente', data),
