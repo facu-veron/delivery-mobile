@@ -4,12 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ComercioCard } from '@/features/cliente/components/ComercioCard';
 import { useComercios } from '@/features/cliente/hooks/useComercios';
+import { useAuthStore } from '@/features/auth/store/auth.store';
+import { Avatar } from '@/shared/components/Avatar';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { Comercio } from '@/shared/types/comercio.types';
 
 export default function ClienteHomeScreen() {
   const router = useRouter();
+  const { nombre } = useAuthStore();
+  const firstName = nombre.split(' ')[0];
   const { data: comercios, isLoading, isError, refetch, isRefetching } = useComercios();
 
   if (isLoading) return <LoadingSpinner />;
@@ -25,9 +29,17 @@ export default function ClienteHomeScreen() {
         }
         ListHeaderComponent={
           <View className="px-4 pt-4 pb-3 gap-3">
-            <Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
-              ¿Qué querés pedir?
-            </Text>
+            <View className="flex-row items-center justify-between">
+              <View>
+                <Text className="text-sm text-muted-foreground dark:text-muted-dark-foreground">
+                  Bienvenido de vuelta
+                </Text>
+                <Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+                  Hola, {firstName}
+                </Text>
+              </View>
+              <Avatar nombre={nombre} size={44} />
+            </View>
             {/* Pedido libre CTA */}
             <Pressable
               onPress={() => router.push('/(cliente)/pedido-libre/nuevo' as any)}

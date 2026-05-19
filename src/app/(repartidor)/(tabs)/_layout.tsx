@@ -1,14 +1,24 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Notifications from 'expo-notifications';
 import { Tabs } from 'expo-router';
 import { useEffect } from 'react';
-import { Text, useColorScheme } from 'react-native';
+import { View, useColorScheme } from 'react-native';
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+function TabIcon({ name, color, focused }: { name: IconName; color: string; focused: boolean }) {
+  return (
+    <View style={[
+      { width: 52, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+      focused && { backgroundColor: 'rgba(238, 194, 52, 0.15)' },
+    ]}>
+      <Ionicons name={name} size={24} color={color} />
+    </View>
+  );
+}
 
 import { useActualizarPushToken } from '@/features/repartidor/hooks/useActualizarPushToken';
 import { queryClient } from '@/shared/api/query-client';
-
-function TabIcon({ emoji, color }: { emoji: string; color: string }) {
-  return <Text style={{ fontSize: 20, color }}>{emoji}</Text>;
-}
 
 export default function RepartidorTabs() {
   const scheme = useColorScheme();
@@ -37,34 +47,35 @@ export default function RepartidorTabs() {
         },
         tabBarActiveTintColor: '#EEC234',
         tabBarInactiveTintColor: isDark ? '#9E9891' : '#6A6052',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
       }}
     >
       <Tabs.Screen
         name="disponibles"
         options={{
           title: 'Disponibles',
-          tabBarIcon: ({ color }) => <TabIcon emoji="📦" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="fast-food-outline" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="activo"
         options={{
           title: 'En curso',
-          tabBarIcon: ({ color }) => <TabIcon emoji="🛵" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="bicycle-outline" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="historial"
         options={{
           title: 'Historial',
-          tabBarIcon: ({ color }) => <TabIcon emoji="📋" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="time-outline" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => <TabIcon emoji="👤" color={color} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="person-outline" color={color} focused={focused} />,
         }}
       />
     </Tabs>
