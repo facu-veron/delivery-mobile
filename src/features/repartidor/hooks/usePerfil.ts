@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-import { useDisponibilidadStore } from '../store/disponibilidad.store';
+import { DisponibilidadRepartidor } from '@/shared/types/pedido.types';
 import { repartidorApi } from '../api/repartidor.api';
+import { useDisponibilidadStore } from '../store/disponibilidad.store';
 
 export function usePerfil() {
   const setDisponible = useDisponibilidadStore((s) => s.setDisponible);
@@ -15,8 +16,10 @@ export function usePerfil() {
 
   // Sincroniza el store con el valor real del servidor
   useEffect(() => {
-    if (query.data) setDisponible(query.data.disponible);
-  }, [query.data?.disponible]);
+    if (query.data) {
+      setDisponible(query.data.disponibilidad === DisponibilidadRepartidor.DISPONIBLE);
+    }
+  }, [query.data?.disponibilidad]);
 
   return query;
 }

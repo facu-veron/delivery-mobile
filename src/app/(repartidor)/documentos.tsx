@@ -3,24 +3,33 @@ import { Camera, Upload } from 'lucide-react-native';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { DocumentoRepartidor } from '@/features/repartidor/api/repartidor.api';
 import { useDocumentos } from '@/features/repartidor/hooks/useDocumentos';
 import { useSubirDocumento } from '@/features/repartidor/hooks/useSubirDocumento';
 import { Badge } from '@/shared/components/Badge';
 import { Card } from '@/shared/components/Card';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
-import { EstadoDocumento } from '@/shared/types/pedido.types';
+import {
+  DocumentoRepartidor,
+  EstadoDocumento,
+  TipoDocumento,
+} from '@/shared/types/pedido.types';
 
-const DOCUMENTOS_LABELS: Record<string, string> = {
-  selfie:                  'Foto personal (selfie)',
-  dni_frente:              'DNI — Frente',
-  dni_dorso:               'DNI — Dorso',
-  antecedentes_penales:    'Antecedentes penales',
-  antecedentes_judiciales: 'Antecedentes judiciales',
+const DOCUMENTOS_LABELS: Record<TipoDocumento, string> = {
+  [TipoDocumento.FOTO_PERSONAL]:           'Foto personal (selfie)',
+  [TipoDocumento.DNI_FRENTE]:              'DNI — Frente',
+  [TipoDocumento.DNI_DORSO]:               'DNI — Dorso',
+  [TipoDocumento.ANTECEDENTES_PENALES]:    'Antecedentes penales',
+  [TipoDocumento.ANTECEDENTES_JUDICIALES]: 'Antecedentes judiciales',
 };
 
-const DOCUMENTOS_KEYS = Object.keys(DOCUMENTOS_LABELS);
+const DOCUMENTOS_ORDEN: TipoDocumento[] = [
+  TipoDocumento.FOTO_PERSONAL,
+  TipoDocumento.DNI_FRENTE,
+  TipoDocumento.DNI_DORSO,
+  TipoDocumento.ANTECEDENTES_PENALES,
+  TipoDocumento.ANTECEDENTES_JUDICIALES,
+];
 
 const estadoVariant: Record<EstadoDocumento, 'warning' | 'success' | 'destructive'> = {
   [EstadoDocumento.PENDIENTE]: 'warning',
@@ -36,12 +45,12 @@ const estadoLabel: Record<EstadoDocumento, string> = {
 
 interface DocumentoRowProps {
   doc: DocumentoRepartidor;
-  onSubir: (key: string) => void;
+  onSubir: (tipo: TipoDocumento) => void;
   uploading: boolean;
 }
 
 function DocumentoRow({ doc, onSubir, uploading }: DocumentoRowProps) {
-  const label = DOCUMENTOS_LABELS[doc.key] ?? doc.key;
+  const label = DOCUMENTOS_LABELS[doc.tipo] ?? doc.tipo;
 
   return (
     <Card className="gap-2">
@@ -59,7 +68,7 @@ function DocumentoRow({ doc, onSubir, uploading }: DocumentoRowProps) {
         {doc.estado !== EstadoDocumento.APROBADO && (
           <Pressable
             className="flex-row items-center gap-1.5 bg-secondary dark:bg-secondary-dark px-3 py-2 rounded-lg active:opacity-75 disabled:opacity-50"
-            onPress={() => onSubir(doc.key)}
+            onPress={() => onSubir(doc.tipo)}
             disabled={uploading}
           >
             <Upload size={14} color="#EEC234" strokeWidth={2.25} />
@@ -82,7 +91,7 @@ export default function DocumentosScreen() {
   const { data: documentos, isLoading } = useDocumentos();
   const { mutate: subir, isPending } = useSubirDocumento();
 
-  const handleSubir = async (key: string) => {
+  const handleSubir = async (tipo: TipoDocumento) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería para subir documentos.');
@@ -101,17 +110,22 @@ export default function DocumentosScreen() {
     const formData = new FormData();
     formData.append('archivo', {
       uri: asset.uri,
-      name: asset.fileName ?? `${key}.jpg`,
+      name: asset.fileName ?? `${tipo}.jpg`,
       type: asset.mimeType ?? 'image/jpeg',
     } as any);
 
-    subir({ key, formData });
+    subir({ tipo, formData });
   };
 
-  // Build list merging API data with static keys (show all keys even if API returns subset)
-  const docsMap = new Map((documentos ?? []).map((d) => [d.key, d]));
-  const docsList: DocumentoRepartidor[] = DOCUMENTOS_KEYS.map(
-    (key) => docsMap.get(key) ?? { key, estado: EstadoDocumento.PENDIENTE }
+  // Mostrar todos los tipos de documento, completando con PENDIENTE los que aún no se subieron
+  const docsMap = new Map((documentos ?? []).map((d) => [d.tipo, d]));
+  const docsList: DocumentoRepartidor[] = DOCUMENTOS_ORDEN.map(
+    (tipo) =>
+      docsMap.get(tipo) ?? {
+        tipo,
+        estado: EstadoDocumento.PENDIENTE,
+        motivoRechazo: null,
+      },
   );
 
   return (
@@ -131,7 +145,7 @@ export default function DocumentosScreen() {
 
           {docsList.map((doc) => (
             <DocumentoRow
-              key={doc.key}
+              key={doc.tipo}
               doc={doc}
               onSubir={handleSubir}
               uploading={isPending}

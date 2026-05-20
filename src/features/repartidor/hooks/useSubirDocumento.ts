@@ -1,14 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 
+import type { TipoDocumento } from '@/shared/types/pedido.types';
 import { repartidorApi } from '../api/repartidor.api';
 
 export function useSubirDocumento() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ key, formData }: { key: string; formData: FormData }) =>
-      repartidorApi.subirDocumento(key, formData),
+    mutationFn: ({ tipo, formData }: { tipo: TipoDocumento; formData: FormData }) =>
+      repartidorApi.subirDocumento(tipo, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repartidor', 'documentos'] });
     },

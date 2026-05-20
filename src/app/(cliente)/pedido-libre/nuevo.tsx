@@ -4,6 +4,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { DireccionSelector } from '@/features/cliente/components/DireccionSelector';
 import { useCrearPedidoLibre } from '@/features/cliente/hooks/useCrearPedidoLibre';
 import {
   PedidoLibreFormValues,
@@ -42,6 +43,7 @@ export default function PedidoLibreNuevoScreen() {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<PedidoLibreFormValues>({
     resolver: zodResolver(pedidoLibreSchema) as any,
@@ -194,6 +196,7 @@ export default function PedidoLibreNuevoScreen() {
           <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider">
             Entrega
           </Text>
+          <DireccionSelector onSelect={(d) => setValue('clienteDireccion', d)} />
           <Campo label="Tu dirección de entrega" error={errors.clienteDireccion?.message}>
             <Controller
               control={control}

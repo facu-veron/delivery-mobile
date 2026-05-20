@@ -2,16 +2,22 @@ import { create } from 'zustand';
 
 import { RolUsuario } from '@/shared/types/pedido.types';
 
-interface SessionData {
+interface SessionCore {
   usuarioId: string;
   rol: RolUsuario;
   perfilId: string;
   nombre: string;
 }
 
-interface AuthState extends SessionData {
+interface SessionProfile {
+  telefono: string;
+  avatarUrl: string | null;
+}
+
+interface AuthState extends SessionCore, SessionProfile {
   isAuthenticated: boolean;
-  setSession: (data: SessionData) => void;
+  setSession: (data: SessionCore) => void;
+  setPerfil: (data: Partial<SessionProfile> & { nombre?: string }) => void;
   clearSession: () => void;
 }
 
@@ -21,10 +27,13 @@ const initialState = {
   rol: null as unknown as RolUsuario,
   perfilId: '',
   nombre: '',
+  telefono: '',
+  avatarUrl: null as string | null,
 };
 
 export const useAuthStore = create<AuthState>()((set) => ({
   ...initialState,
   setSession: (data) => set({ ...data, isAuthenticated: true }),
+  setPerfil: (data) => set((s) => ({ ...s, ...data })),
   clearSession: () => set({ ...initialState }),
 }));

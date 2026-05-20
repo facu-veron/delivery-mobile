@@ -10,6 +10,7 @@ import { Card } from '@/shared/components/Card';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
+import { usePedidoSSE } from '@/shared/hooks/usePedidoSSE';
 import { formatARS, formatDateTime } from '@/shared/lib/formatters';
 import { TipoPedido } from '@/shared/types/pedido.types';
 
@@ -47,6 +48,7 @@ function FilaConIcono({
 export default function PedidoDetalleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: pedido, isLoading, isError } = usePedidoDetalle(id);
+  usePedidoSSE(id, { queryKey: ['pedido', id], estado: pedido?.estado });
 
   if (isLoading) return <LoadingSpinner />;
   if (isError || !pedido) return <ErrorMessage message="No se pudo cargar el pedido." />;

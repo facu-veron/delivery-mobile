@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { ComercioCard } from '@/features/cliente/components/ComercioCard';
 import { useComercios } from '@/features/cliente/hooks/useComercios';
+import { useFavoritos, useToggleFavorito } from '@/features/cliente/hooks/useFavoritos';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
@@ -14,9 +15,13 @@ import { Comercio } from '@/shared/types/comercio.types';
 
 export default function ClienteHomeScreen() {
   const router = useRouter();
-  const { nombre } = useAuthStore();
+  const { nombre, avatarUrl } = useAuthStore();
   const firstName = nombre.split(' ')[0];
   const { data: comercios, isLoading, isError, refetch, isRefetching } = useComercios();
+  const { data: favoritos } = useFavoritos();
+  const { mutate: toggleFavorito } = useToggleFavorito();
+
+  const favoritoIds = new Set((favoritos ?? []).map((f) => f.id));
 
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <ErrorMessage message="No se pudieron cargar los comercios." />;
@@ -41,7 +46,7 @@ export default function ClienteHomeScreen() {
                   Hola, {firstName}
                 </Text>
               </View>
-              <Avatar nombre={nombre} size={44} />
+              <Avatar nombre={nombre} avatarUrl={avatarUrl ?? undefined} size={44} />
             </View>
 
             {/* Pedido libre CTA */}
@@ -73,6 +78,10 @@ export default function ClienteHomeScreen() {
             <ComercioCard
               comercio={item}
               onPress={() => router.push(`/(cliente)/comercio/${item.id}` as any)}
+              isFavorito={favoritoIds.has(item.id)}
+              onToggleFavorito={() =>
+                toggleFavorito({ comercioId: item.id, isFavorito: favoritoIds.has(item.id) })
+              }
             />
           </View>
         )}

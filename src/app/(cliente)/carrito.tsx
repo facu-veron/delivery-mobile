@@ -6,6 +6,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { DireccionSelector } from '@/features/cliente/components/DireccionSelector';
 import { useCrearPedidoCatalogo } from '@/features/cliente/hooks/useCrearPedidoCatalogo';
 import { useCarritoStore } from '@/features/cliente/store/carrito.store';
 import { Button } from '@/shared/components/Button';
@@ -25,7 +26,7 @@ export default function CarritoScreen() {
   const { items, total, limpiar, comercioId, cambiarCantidad } = useCarritoStore();
   const { mutate: crearPedido, isPending } = useCrearPedidoCatalogo();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
@@ -111,10 +112,11 @@ export default function CarritoScreen() {
         </Card>
 
         {/* Dirección */}
-        <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
+        <Card className="gap-3">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider">
             Dirección de entrega
           </Text>
+          <DireccionSelector onSelect={(d) => setValue('clienteDireccion', d)} />
           <Controller
             control={control}
             name="clienteDireccion"

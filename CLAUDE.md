@@ -114,6 +114,45 @@ Real-time order status uses **5-second polling** (React Query `refetchInterval`)
 - **expo-image-picker plugin:** agregado en `app.json` (requerido para permisos nativos en builds EAS).
 - **Paquetes nuevos:** `expo-image-picker ~55.0.20`, `expo-haptics ~55.0.14` (requieren rebuild EAS).
 
+### Bloque 1 — Alineación tipos + auth ✓
+- **Tipos:** `pedido.types.ts` reescrito — `DisponibilidadRepartidor` enum, `EstadoAprobacion`, `TipoDocumento` uppercase, `DocumentoRepartidor` con `motivoRechazo: string | null`, `Repartidor` con `avatarUrl`, `calificacionProm`, `totalEntregas`, `documentos[]`.
+- **Login 401:** `useLogin` diferencia credenciales incorrectas (401) de error de red — mensaje de error específico en pantalla.
+- **DisponibilidadSwitch:** cuando estado ≠ APROBADO, tarjeta tappable con CTA → `/documentos` en lugar de toggle.
+
+### Bloque 2 — /api/me + editar perfil + ganancias ✓
+- **meApi:** `GET /api/me`, `PATCH /api/me`, `POST /api/me/avatar`. Hooks: `useMe`, `useActualizarMe`, `useSubirAvatar`.
+- **useMe en layouts:** ambos group `_layout.tsx` llaman `useMe()` al entrar para hidratar `authStore` con `avatarUrl` y `telefono`.
+- **EditarPerfilScreen** compartida en `src/features/auth/screens/` — re-exportada desde cada group (`/(cliente)/editar-perfil`, `/(repartidor)/editar-perfil`) para heredar guards. Avatar tappable → image picker → upload. Campos: nombre, teléfono (ambos), vehículo (repartidor). Submit deshabilitado hasta `isDirty`.
+- **auth.store:** extendido con `telefono`, `avatarUrl`, `setPerfil()`.
+- **Ganancias:** `/(repartidor)/ganancias` — métricas hoy/semana/mes (`MetricaCard`), rating card, detalle de entregas del período. Hooks: `useEstadisticas`, `useGanancias`.
+- **Componentes nuevos:** `ScreenHeader`, `EmptyState`, `Skeleton`/`SkeletonCard`/`SkeletonList`, `ProfileQuickAction`, `ProfileListItem`, `ProfileSection`, `Avatar`.
+
+### Bloque 3 — Direcciones + Favoritos ✓
+- **Tipos:** `DireccionCliente`, `CrearDireccionDto`, `ActualizarDireccionDto` en `pedido.types.ts`.
+- **cliente.api:** `getDirecciones`, `crearDireccion`, `actualizarDireccion`, `eliminarDireccion`, `getFavoritos`, `agregarFavorito`, `quitarFavorito`, `calificarPedido`.
+- **Hooks:** `useDirecciones`, `useCrearDireccion`, `useActualizarDireccion`, `useEliminarDireccion`; `useFavoritos`, `useToggleFavorito`.
+- **DireccionesScreen** `/(cliente)/direcciones` — lista con badge "Principal", modal de alta (alias/calle/número/barrio/referencia/principal), confirm antes de eliminar.
+- **DireccionSelector** — chips horizontales con direcciones guardadas que pre-rellenan el campo de texto en carrito y pedido-libre.
+- **FavoritosScreen** `/(cliente)/favoritos` — lista de comercios favoritos.
+- **ComercioCard:** botón corazón superpuesto en imagen con `isFavorito`/`onToggleFavorito` opcionales. Home carga favoritos y pasa ambas props.
+- **Perfil cliente:** quick actions Direcciones y Favoritos navegan a sus pantallas.
+
+### Bloque 4 — Calificaciones + Notificaciones in-app ✓
+- **Tipos:** `calificado?: boolean` en `Pedido`; `TipoNotificacion` enum, `Notificacion`, `NotificacionesResponse` en `pedido.types.ts`.
+- **notificacionesApi + hooks:** `useNotificaciones`, `useNoLeidas`, `useMarcarLeida`, `useMarcarTodasLeidas`.
+- **CalificacionWidget** inline en `/(cliente)/pedido/[id]` cuando estado = ENTREGADO — 5 estrellas tapeables, comentario opcional, maneja 400 "ya calificado" silenciosamente mostrando estado readonly.
+- **NotificacionesScreen** compartida en `src/shared/screens/` — lista por tipo con ícono/color semántico, punto azul para no-leídas, "Marcar leídas" en header. Rutas: `/(cliente)/notificaciones`, `/(repartidor)/notificaciones`.
+- **Badge en campana:** ambos perfiles muestran `noLeidas` sobre el ícono Bell (cap en 9+), navegan a su pantalla de notificaciones.
+- **Repartidor "Calificaciones":** quick action redirige a ganancias (donde está el rating card con promedio y total).
+
+### Bloque 5 — Ayuda/Soporte + SSE ✓
+- **ayudaApi:** `GET /api/ayuda/faqs` (FAQs filtradas por rol en backend), `POST /api/ayuda/contacto`. Hooks: `useFaqs`, `useEnviarContacto`.
+- **AyudaScreen** compartida en `src/shared/screens/` — FAQs en acordeón agrupadas por categoría (PAGOS/PEDIDOS/CUENTA/OTROS), formulario de contacto RHF+Zod. Rutas: `/(cliente)/ayuda`, `/(repartidor)/ayuda`.
+- **Quick action "Ayuda":** ambos perfiles navegan a su pantalla.
+- **usePedidoSSE(pedidoId, { queryKey, estado }):** conecta EventSource a `/api/pedidos/:id/estado` con `Authorization: Bearer <token>` (vía `SuperTokens.getAccessToken()`). En cada evento `estado_actualizado` invalida el queryKey dado. Se cierra si el pedido está en estado terminal. En error de red, cierra silenciosamente y el polling de React Query actúa como fallback.
+- **SSE wired en:** `/(cliente)/pedido/[id]`, `/(repartidor)/pedido/[id]`, `/(repartidor)/(tabs)/activo`.
+- **Patrón de pantallas compartidas:** `src/shared/screens/` aloja `NotificacionesScreen` y `AyudaScreen`. Las rutas en cada group son re-exports de un default, heredando los guards del group sin duplicar lógica.
+
 ## Notas de build
 
 Paquetes nativos que requirieron rebuild del dev client:

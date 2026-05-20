@@ -1,19 +1,24 @@
 import { apiClient } from '@/shared/api/client';
-import type { EstadoDocumento, Pedido, Repartidor } from '@/shared/types/pedido.types';
+import type {
+  DocumentoRepartidor,
+  EstadisticasRepartidor,
+  GananciasResponse,
+  Pedido,
+  Repartidor,
+  TipoDocumento,
+} from '@/shared/types/pedido.types';
 
-export interface DocumentoRepartidor {
-  key: string;
-  estado: EstadoDocumento;
-  motivoRechazo?: string;
-  url?: string;
-}
+export type { DocumentoRepartidor } from '@/shared/types/pedido.types';
 
 export const repartidorApi = {
   getPerfil: () =>
     apiClient.get<Repartidor>('/api/repartidor/perfil'),
 
+  actualizarPerfil: (data: { nombre?: string; telefono?: string; vehiculo?: string }) =>
+    apiClient.patch<Repartidor>('/api/repartidor/perfil', data),
+
   cambiarDisponibilidad: (disponible: boolean) =>
-    apiClient.patch('/api/repartidor/disponibilidad', { disponible }),
+    apiClient.patch<{ disponible: boolean }>('/api/repartidor/disponibilidad', { disponible }),
 
   actualizarPushToken: (token: string) =>
     apiClient.patch('/api/repartidor/push-token', { token }),
@@ -30,8 +35,14 @@ export const repartidorApi = {
   getDocumentos: () =>
     apiClient.get<DocumentoRepartidor[]>('/api/repartidor/documentos'),
 
-  subirDocumento: (key: string, formData: FormData) =>
-    apiClient.post(`/api/repartidor/documentos/${key}`, formData, {
+  subirDocumento: (tipo: TipoDocumento, formData: FormData) =>
+    apiClient.post(`/api/repartidor/documentos/${tipo}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+
+  getEstadisticas: () =>
+    apiClient.get<EstadisticasRepartidor>('/api/repartidor/estadisticas'),
+
+  getGanancias: (params?: { desde?: string; hasta?: string }) =>
+    apiClient.get<GananciasResponse>('/api/repartidor/ganancias', { params }),
 };

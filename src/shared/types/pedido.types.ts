@@ -26,11 +26,23 @@ export enum EstadoDocumento {
   RECHAZADO = 'RECHAZADO',
 }
 
-export enum EstadoRepartidor {
+export enum TipoDocumento {
+  FOTO_PERSONAL = 'FOTO_PERSONAL',
+  DNI_FRENTE = 'DNI_FRENTE',
+  DNI_DORSO = 'DNI_DORSO',
+  ANTECEDENTES_PENALES = 'ANTECEDENTES_PENALES',
+  ANTECEDENTES_JUDICIALES = 'ANTECEDENTES_JUDICIALES',
+}
+
+export enum DisponibilidadRepartidor {
   DISPONIBLE = 'DISPONIBLE',
   NO_DISPONIBLE = 'NO_DISPONIBLE',
   EN_PEDIDO = 'EN_PEDIDO',
 }
+
+/** @deprecated Usar DisponibilidadRepartidor — mantenido por compatibilidad histórica */
+export const EstadoRepartidor = DisponibilidadRepartidor;
+export type EstadoRepartidor = DisponibilidadRepartidor;
 
 export enum EstadoAprobacion {
   PENDIENTE = 'PENDIENTE',
@@ -68,15 +80,112 @@ export interface Pedido {
   repartidorId?: string;
   createdAt: string;
   busquedaExpiraEn?: string;
+  calificado?: boolean;
+}
+
+export enum TipoNotificacion {
+  NUEVO_PEDIDO = 'NUEVO_PEDIDO',
+  AVISAR_CLIENTE = 'AVISAR_CLIENTE',
+  DOCUMENTO_APROBADO = 'DOCUMENTO_APROBADO',
+  DOCUMENTO_RECHAZADO = 'DOCUMENTO_RECHAZADO',
+  PEDIDO_ENTREGADO = 'PEDIDO_ENTREGADO',
+  PEDIDO_CANCELADO = 'PEDIDO_CANCELADO',
+  SISTEMA = 'SISTEMA',
+}
+
+export interface Notificacion {
+  id: string;
+  tipo: TipoNotificacion;
+  titulo: string;
+  cuerpo: string;
+  data?: Record<string, string>;
+  leida: boolean;
+  creadoEn: string;
+}
+
+export interface NotificacionesResponse {
+  total: number;
+  noLeidas: number;
+  items: Notificacion[];
+}
+
+export interface DocumentoRepartidor {
+  id?: string;
+  tipo: TipoDocumento;
+  estado: EstadoDocumento;
+  motivoRechazo: string | null;
+  archivoUrl?: string;
 }
 
 export interface Repartidor {
   id: string;
   nombre: string;
-  email: string;
   telefono: string;
   vehiculo: string;
-  zona: string;
-  disponible: boolean;
-  aprobacion: EstadoAprobacion;
+  patente?: string;
+  avatarUrl: string | null;
+  /** Estado de aprobación de la cuenta — PENDIENTE/APROBADO/RECHAZADO */
+  estado: EstadoAprobacion;
+  /** Disponibilidad actual del repartidor — DISPONIBLE/NO_DISPONIBLE/EN_PEDIDO */
+  disponibilidad: DisponibilidadRepartidor;
+  zonaId: string;
+  calificacionProm: number;
+  totalEntregas: number;
+  documentos: DocumentoRepartidor[];
 }
+
+export interface MePerfil {
+  nombre: string;
+  telefono: string;
+  avatarUrl: string | null;
+  creadoEn?: string;
+}
+
+export interface MeResponse {
+  usuarioId: string;
+  rol: RolUsuario;
+  perfilId: string;
+  perfil: MePerfil & { id: string };
+}
+
+export interface PeriodoEstadisticas {
+  entregas: number;
+  ganancias: number;
+}
+
+export interface EstadisticasRepartidor {
+  hoy: PeriodoEstadisticas;
+  semana: PeriodoEstadisticas;
+  mes: PeriodoEstadisticas;
+  rating: {
+    promedio: number;
+    totalCalificaciones: number;
+  };
+}
+
+export interface GananciaPedido {
+  pedidoId: string;
+  fecha: string;
+  montoEnvio: number;
+}
+
+export interface GananciasResponse {
+  total: number;
+  pedidos: GananciaPedido[];
+}
+
+export interface DireccionCliente {
+  id: string;
+  clienteId: string;
+  alias: string;
+  calle: string;
+  numero: string;
+  barrio?: string;
+  referencia?: string;
+  latitud?: number;
+  longitud?: number;
+  esPrincipal: boolean;
+}
+
+export type CrearDireccionDto = Omit<DireccionCliente, 'id' | 'clienteId'>;
+export type ActualizarDireccionDto = Partial<Omit<DireccionCliente, 'id' | 'clienteId'>>;

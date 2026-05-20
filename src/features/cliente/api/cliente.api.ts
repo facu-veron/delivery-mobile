@@ -1,6 +1,11 @@
 import { apiClient } from '@/shared/api/client';
 import { Comercio, ComercioDetalle } from '@/shared/types/comercio.types';
-import { Pedido } from '@/shared/types/pedido.types';
+import {
+  ActualizarDireccionDto,
+  CrearDireccionDto,
+  DireccionCliente,
+  Pedido,
+} from '@/shared/types/pedido.types';
 
 export interface CrearPedidoLibreDto {
   localNombre: string;
@@ -51,5 +56,46 @@ export const clienteApi = {
   getHistorial: async (): Promise<Pedido[]> => {
     const { data } = await apiClient.get<Pedido[]>('/pedidos/mis-pedidos/historial');
     return data;
+  },
+
+  // Direcciones
+  getDirecciones: async (): Promise<DireccionCliente[]> => {
+    const { data } = await apiClient.get<DireccionCliente[]>('/api/cliente/direcciones');
+    return data;
+  },
+
+  crearDireccion: async (dto: CrearDireccionDto): Promise<DireccionCliente> => {
+    const { data } = await apiClient.post<DireccionCliente>('/api/cliente/direcciones', dto);
+    return data;
+  },
+
+  actualizarDireccion: async (id: string, dto: ActualizarDireccionDto): Promise<DireccionCliente> => {
+    const { data } = await apiClient.patch<DireccionCliente>(`/api/cliente/direcciones/${id}`, dto);
+    return data;
+  },
+
+  eliminarDireccion: async (id: string): Promise<void> => {
+    await apiClient.delete(`/api/cliente/direcciones/${id}`);
+  },
+
+  // Favoritos
+  getFavoritos: async (): Promise<Comercio[]> => {
+    const { data } = await apiClient.get<{ comercios: Comercio[] }>('/api/cliente/favoritos');
+    return data.comercios;
+  },
+
+  agregarFavorito: async (comercioId: string): Promise<void> => {
+    await apiClient.post(`/api/cliente/favoritos/${comercioId}`);
+  },
+
+  quitarFavorito: async (comercioId: string): Promise<void> => {
+    await apiClient.delete(`/api/cliente/favoritos/${comercioId}`);
+  },
+
+  calificarPedido: async (
+    pedidoId: string,
+    dto: { puntaje: number; comentario?: string }
+  ): Promise<void> => {
+    await apiClient.post(`/api/pedidos/${pedidoId}/calificar`, dto);
   },
 };

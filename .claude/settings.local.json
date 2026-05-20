@@ -10,7 +10,8 @@
       "Bash(node -e \"const pkg = require\\('./package.json'\\); const deps = {...pkg.dependencies, ...pkg.devDependencies}; ['expo-image-picker','expo-haptics','expo-file-system','react-native-sse'].forEach\\(p => console.log\\(p, deps[p] || 'NOT INSTALLED'\\)\\)\")",
       "Bash(node -e \"const pkg = require\\('./package.json'\\); const deps = {...pkg.dependencies, ...pkg.devDependencies}; Object.keys\\(deps\\).filter\\(k => k.startsWith\\('expo'\\)\\).sort\\(\\).forEach\\(k => console.log\\(k, deps[k]\\)\\)\")",
       "Bash(npx expo *)",
-      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('image-picker:', pkg.dependencies['expo-image-picker']\\); console.log\\('haptics:', pkg.dependencies['expo-haptics']\\)\")"
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('image-picker:', pkg.dependencies['expo-image-picker']\\); console.log\\('haptics:', pkg.dependencies['expo-haptics']\\)\")",
+      "Bash(npx eslint *)"
     ]
   }
 }

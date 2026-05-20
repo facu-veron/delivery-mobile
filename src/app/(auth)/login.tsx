@@ -21,7 +21,14 @@ import { Input } from '@/shared/components/Input';
 export default function LoginScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const { mutate: login, isPending, isError } = useLogin();
+  const { mutate: login, isPending, isError, error } = useLogin();
+
+  const errorMessage = (() => {
+    if (!isError) return null;
+    const status = (error as any)?.response?.status;
+    if (status === 401) return 'Credenciales incorrectas. Revisá tu email y contraseña.';
+    return 'No pudimos iniciar sesión. Probá de nuevo en unos segundos.';
+  })();
 
   const {
     control,
@@ -97,10 +104,10 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
-            {isError && (
+            {errorMessage && (
               <View className="bg-destructive-light dark:bg-destructive-dark-light rounded-lg px-4 py-3">
                 <Text className="text-destructive dark:text-destructive-dark text-sm text-center">
-                  Credenciales incorrectas. Revisá tu email y contraseña.
+                  {errorMessage}
                 </Text>
               </View>
             )}

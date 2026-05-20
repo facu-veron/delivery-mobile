@@ -1,10 +1,14 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Home, MapPin } from 'lucide-react-native';
-import { ScrollView, Text, View } from 'react-native';
+import { Home, MapPin, Star } from 'lucide-react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useCalificarPedido } from '@/features/cliente/hooks/useCalificarPedido';
 import { usePedidoCliente } from '@/features/cliente/hooks/usePedidoCliente';
 import { EstadoBadge } from '@/features/pedidos/components/EstadoBadge';
+import { usePedidoSSE } from '@/shared/hooks/usePedidoSSE';
+import { Button } from '@/shared/components/Button';
 import { Card } from '@/shared/components/Card';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
@@ -82,9 +86,84 @@ function FilaConIcono({
   );
 }
 
+function CalificacionWidget({ pedidoId, yaCalificado }: { pedidoId: string; yaCalificado: boolean }) {
+  const [puntaje, setPuntaje] = useState(0);
+  const [comentario, setComentario] = useState('');
+  const [enviado, setEnviado] = useState(yaCalificado);
+  const { mutate: calificar, isPending } = useCalificarPedido(pedidoId);
+
+  if (enviado) {
+    return (
+      <Card className="items-center gap-2 py-4">
+        <View className="flex-row gap-0.5">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Star key={i} size={20} color="#EEC234" strokeWidth={1.5} fill="#EEC234" />
+          ))}
+        </View>
+        <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark">
+          ¡Gracias por tu calificación!
+        </Text>
+        <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground text-center">
+          Tu opinión ayuda a mejorar el servicio.
+        </Text>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="gap-3">
+      <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider">
+        Calificá al repartidor
+      </Text>
+      <View className="flex-row justify-center gap-2">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Pressable key={i} onPress={() => setPuntaje(i)} hitSlop={4}>
+            <Star
+              size={32}
+              color="#EEC234"
+              strokeWidth={1.5}
+              fill={i <= puntaje ? '#EEC234' : 'transparent'}
+            />
+          </Pressable>
+        ))}
+      </View>
+      {puntaje > 0 && (
+        <TextInput
+          value={comentario}
+          onChangeText={setComentario}
+          placeholder="Comentario (opcional)"
+          placeholderTextColor="#9E9891"
+          multiline
+          numberOfLines={2}
+          textAlignVertical="top"
+          className="border border-border dark:border-border-dark bg-background dark:bg-background-dark rounded-lg px-3 py-2.5 text-sm text-foreground dark:text-foreground-dark min-h-[60px]"
+        />
+      )}
+      <Button
+        onPress={() =>
+          calificar(
+            { puntaje, comentario: comentario || undefined },
+            {
+              onSuccess: () => setEnviado(true),
+              onError: (err: any) => {
+                if (err?.response?.status === 400) setEnviado(true);
+              },
+            }
+          )
+        }
+        disabled={puntaje === 0}
+        loading={isPending}
+      >
+        Enviar calificación
+      </Button>
+    </Card>
+  );
+}
+
 export default function PedidoClienteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: pedido, isLoading, isError } = usePedidoCliente(id);
+  usePedidoSSE(id, { queryKey: ['pedidos', 'cliente', id], estado: pedido?.estado });
 
   if (isLoading) return <LoadingSpinner />;
   if (isError || !pedido) return <ErrorMessage message="No se pudo cargar el pedido." />;
@@ -205,6 +284,13 @@ export default function PedidoClienteScreen() {
             </Text>
           </View>
         </Card>
+
+        {entregado && (
+          <CalificacionWidget
+            pedidoId={pedido.id}
+            yaCalificado={pedido.calificado ?? false}
+          />
+        )}
 
         <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground text-center">
           Pedido #{pedido.id.slice(-6).toUpperCase()} · {formatDateTime(pedido.createdAt)}

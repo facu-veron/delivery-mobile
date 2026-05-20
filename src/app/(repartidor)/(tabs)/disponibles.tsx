@@ -23,8 +23,8 @@ export default function DisponiblesScreen() {
 
   if (loadingPerfil) return <LoadingSpinner />;
 
-  const aprobacion = perfil?.aprobacion ?? EstadoAprobacion.PENDIENTE;
-  const noAprobado = aprobacion !== EstadoAprobacion.APROBADO;
+  const estado = perfil?.estado ?? EstadoAprobacion.PENDIENTE;
+  const noAprobado = estado !== EstadoAprobacion.APROBADO;
 
   // Estado 1: cuenta no aprobada
   if (noAprobado) {

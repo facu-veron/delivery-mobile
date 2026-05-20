@@ -5,7 +5,6 @@ import {
   FileText,
   Lock,
   LogOut,
-  Mail,
   MapPin,
   Phone,
   Star,
@@ -26,6 +25,7 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ProfileListItem } from '@/shared/components/profile/ProfileListItem';
 import { ProfileQuickAction } from '@/shared/components/profile/ProfileQuickAction';
 import { ProfileSection } from '@/shared/components/profile/ProfileSection';
+import { useNoLeidas } from '@/shared/hooks/useNotificaciones';
 import { EstadoAprobacion } from '@/shared/types/pedido.types';
 
 const aprobacionVariant = {
@@ -51,6 +51,7 @@ export default function PerfilScreen() {
   const router = useRouter();
   const { data: perfil, isLoading } = usePerfil();
   const { mutate: logout, isPending } = useLogout();
+  const { data: noLeidas } = useNoLeidas();
 
   if (isLoading || !perfil) return <LoadingSpinner />;
 
@@ -67,23 +68,30 @@ export default function PerfilScreen() {
               <Text className="text-base text-foreground dark:text-foreground-dark">
                 ¡Hola, <Text className="font-bold">{firstName}!</Text>
               </Text>
-              <Badge variant={aprobacionVariant[perfil.aprobacion]} dot>
-                {aprobacionLabel[perfil.aprobacion]}
+              <Badge variant={aprobacionVariant[perfil.estado]} dot>
+                {aprobacionLabel[perfil.estado]}
               </Badge>
             </View>
           </View>
           <Pressable
-            onPress={NoImplementadoAlert('notificaciones')}
+            onPress={() => router.push('/(repartidor)/notificaciones' as any)}
             hitSlop={8}
             className="w-10 h-10 rounded-full bg-card dark:bg-card-dark border border-border dark:border-border-dark items-center justify-center active:opacity-70"
           >
             <Bell size={18} color="#251E14" strokeWidth={2} />
+            {!!noLeidas && noLeidas > 0 && (
+              <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive items-center justify-center">
+                <Text className="text-[9px] font-bold text-white">
+                  {noLeidas > 9 ? '9+' : noLeidas}
+                </Text>
+              </View>
+            )}
           </Pressable>
         </View>
 
         {/* Disponibilidad (acción principal) */}
         <View className="px-4">
-          <DisponibilidadSwitch aprobacion={perfil.aprobacion} />
+          <DisponibilidadSwitch estado={perfil.estado} />
         </View>
 
         {/* Quick actions */}
@@ -96,17 +104,17 @@ export default function PerfilScreen() {
           <ProfileQuickAction
             icon={Wallet}
             label="Ganancias"
-            onPress={NoImplementadoAlert('ganancias')}
+            onPress={() => router.push('/(repartidor)/ganancias' as any)}
           />
           <ProfileQuickAction
             icon={Star}
             label="Calificaciones"
-            onPress={NoImplementadoAlert('calificaciones')}
+            onPress={() => router.push('/(repartidor)/ganancias' as any)}
           />
           <ProfileQuickAction
             icon={CircleHelp}
             label="Ayuda"
-            onPress={NoImplementadoAlert('ayuda')}
+            onPress={() => router.push('/(repartidor)/ayuda' as any)}
           />
         </View>
 
@@ -115,21 +123,13 @@ export default function PerfilScreen() {
           <ProfileListItem
             icon={User}
             label="Datos personales"
-            onPress={NoImplementadoAlert('editar perfil')}
-          />
-          <ProfileListItem
-            icon={Mail}
-            label="Email"
-            description={perfil.email}
-            onPress={NoImplementadoAlert('cambiar email')}
-            showChevron={false}
+            onPress={() => router.push('/(repartidor)/editar-perfil' as any)}
           />
           <ProfileListItem
             icon={Phone}
             label="Teléfono"
             description={perfil.telefono}
-            onPress={NoImplementadoAlert('cambiar teléfono')}
-            showChevron={false}
+            onPress={() => router.push('/(repartidor)/editar-perfil' as any)}
           />
           <ProfileListItem
             icon={Lock}
@@ -144,18 +144,18 @@ export default function PerfilScreen() {
             icon={Truck}
             label="Vehículo"
             description={perfil.vehiculo}
-            onPress={NoImplementadoAlert('vehículo')}
+            onPress={() => router.push('/(repartidor)/editar-perfil' as any)}
           />
           <ProfileListItem
             icon={MapPin}
             label="Zona de trabajo"
-            description={perfil.zona}
             onPress={NoImplementadoAlert('zona')}
           />
           <ProfileListItem
             icon={TrendingUp}
             label="Estadísticas"
-            onPress={NoImplementadoAlert('estadísticas')}
+            description={`${perfil.totalEntregas} entregas · ⭐ ${perfil.calificacionProm.toFixed(1)}`}
+            onPress={() => router.push('/(repartidor)/ganancias' as any)}
           />
         </ProfileSection>
 

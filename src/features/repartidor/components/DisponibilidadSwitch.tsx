@@ -7,17 +7,17 @@ import { useCambiarDisponibilidad } from '../hooks/useCambiarDisponibilidad';
 import { useDisponibilidadStore } from '../store/disponibilidad.store';
 
 interface Props {
-  aprobacion: EstadoAprobacion;
+  estado: EstadoAprobacion;
   motivoRechazo?: string;
 }
 
-export function DisponibilidadSwitch({ aprobacion, motivoRechazo }: Props) {
+export function DisponibilidadSwitch({ estado, motivoRechazo }: Props) {
   const router = useRouter();
   const disponible = useDisponibilidadStore((s) => s.disponible);
   const { mutate, isPending } = useCambiarDisponibilidad();
 
-  const noAprobado = aprobacion !== EstadoAprobacion.APROBADO;
-  const rechazado = aprobacion === EstadoAprobacion.RECHAZADO;
+  const noAprobado = estado !== EstadoAprobacion.APROBADO;
+  const rechazado = estado === EstadoAprobacion.RECHAZADO;
 
   // Si no está aprobado, toda la card lleva a documentos
   if (noAprobado) {

@@ -10,6 +10,7 @@ import { Button } from '@/shared/components/Button';
 import { Card } from '@/shared/components/Card';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { usePedidoSSE } from '@/shared/hooks/usePedidoSSE';
 import { formatARS } from '@/shared/lib/formatters';
 import { TipoPedido } from '@/shared/types/pedido.types';
 
@@ -47,6 +48,10 @@ function FilaConIcono({
 export default function ActivoScreen() {
   const router = useRouter();
   const { data: pedido, isLoading } = usePedidoActivo();
+  usePedidoSSE(pedido?.id ?? '', {
+    queryKey: ['repartidor', 'pedido-activo'],
+    estado: pedido?.estado,
+  });
 
   if (isLoading) return <LoadingSpinner />;
 

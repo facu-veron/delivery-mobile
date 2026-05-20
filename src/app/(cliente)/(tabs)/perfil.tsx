@@ -20,6 +20,7 @@ import { Avatar } from '@/shared/components/Avatar';
 import { ProfileListItem } from '@/shared/components/profile/ProfileListItem';
 import { ProfileQuickAction } from '@/shared/components/profile/ProfileQuickAction';
 import { ProfileSection } from '@/shared/components/profile/ProfileSection';
+import { useNoLeidas } from '@/shared/hooks/useNotificaciones';
 
 function NoImplementadoAlert(feature: string) {
   return () => {
@@ -30,8 +31,9 @@ function NoImplementadoAlert(feature: string) {
 
 export default function ClientePerfilScreen() {
   const router = useRouter();
-  const { nombre } = useAuthStore();
+  const { nombre, avatarUrl } = useAuthStore();
   const { mutate: logout, isPending } = useLogout();
+  const { data: noLeidas } = useNoLeidas();
 
   const firstName = nombre.split(' ')[0] || nombre;
 
@@ -41,7 +43,7 @@ export default function ClientePerfilScreen() {
         {/* Header */}
         <View className="px-4 pt-4 pb-1 flex-row items-center justify-between">
           <View className="flex-row items-center gap-3 flex-1">
-            <Avatar nombre={nombre} size={44} />
+            <Avatar nombre={nombre} avatarUrl={avatarUrl ?? undefined} size={44} />
             <View className="flex-1">
               <Text className="text-base text-foreground dark:text-foreground-dark">
                 ¡Hola, <Text className="font-bold">{firstName}!</Text>
@@ -52,11 +54,18 @@ export default function ClientePerfilScreen() {
             </View>
           </View>
           <Pressable
-            onPress={NoImplementadoAlert('notificaciones')}
+            onPress={() => router.push('/(cliente)/notificaciones' as any)}
             hitSlop={8}
             className="w-10 h-10 rounded-full bg-card dark:bg-card-dark border border-border dark:border-border-dark items-center justify-center active:opacity-70"
           >
             <Bell size={18} color="#251E14" strokeWidth={2} />
+            {!!noLeidas && noLeidas > 0 && (
+              <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive items-center justify-center">
+                <Text className="text-[9px] font-bold text-white">
+                  {noLeidas > 9 ? '9+' : noLeidas}
+                </Text>
+              </View>
+            )}
           </Pressable>
         </View>
 
@@ -65,12 +74,12 @@ export default function ClientePerfilScreen() {
           <ProfileQuickAction
             icon={MapPin}
             label="Direcciones"
-            onPress={NoImplementadoAlert('direcciones')}
+            onPress={() => router.push('/(cliente)/direcciones' as any)}
           />
           <ProfileQuickAction
             icon={Heart}
             label="Favoritos"
-            onPress={NoImplementadoAlert('favoritos')}
+            onPress={() => router.push('/(cliente)/favoritos' as any)}
           />
           <ProfileQuickAction
             icon={CreditCard}
@@ -80,7 +89,7 @@ export default function ClientePerfilScreen() {
           <ProfileQuickAction
             icon={CircleHelp}
             label="Ayuda"
-            onPress={NoImplementadoAlert('ayuda')}
+            onPress={() => router.push('/(cliente)/ayuda' as any)}
           />
         </View>
 
@@ -104,7 +113,7 @@ export default function ClientePerfilScreen() {
             icon={User}
             label="Datos personales"
             description={nombre}
-            onPress={NoImplementadoAlert('editar perfil')}
+            onPress={() => router.push('/(cliente)/editar-perfil' as any)}
           />
           <ProfileListItem
             icon={Lock}
