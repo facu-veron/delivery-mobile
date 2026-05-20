@@ -116,7 +116,10 @@ Real-time order status uses **5-second polling** (React Query `refetchInterval`)
 
 ## Notas de build
 
-Para activar los paquetes nuevos de Fase 5 (`expo-image-picker`, `expo-haptics`), es necesario un rebuild:
+Paquetes nativos que requirieron rebuild del dev client:
+- Fase 5: `expo-image-picker`, `expo-haptics`
+- UI shadcn-style: `lucide-react-native` + `react-native-svg` (peer dep nativa — el síntoma sin rebuild es `'RCTRNSVGPath' ... in ViewManagerRegistry`)
+
 ```bash
 eas build --profile development --platform android
 ```

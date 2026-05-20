@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
+import { Bike, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -31,12 +32,12 @@ type Rol = 'CLIENTE' | 'REPARTIDOR' | null;
 
 // ─── Selector de rol ────────────────────────────────────────────────────────
 function RolCard({
-  emoji,
+  Icon,
   titulo,
   descripcion,
   onPress,
 }: {
-  emoji: string;
+  Icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   titulo: string;
   descripcion: string;
   onPress: () => void;
@@ -44,18 +45,23 @@ function RolCard({
   return (
     <Pressable
       onPress={onPress}
-      className="border-2 border-border dark:border-border-dark bg-card dark:bg-card-dark rounded-2xl p-5 active:border-primary active:bg-secondary dark:active:bg-secondary-dark gap-3"
+      className="border border-border dark:border-border-dark bg-card dark:bg-card-dark rounded-2xl p-5 active:border-primary active:bg-secondary dark:active:bg-secondary-dark gap-3 shadow-sm shadow-foreground/5"
     >
-      <Text className="text-4xl">{emoji}</Text>
+      <View className="w-12 h-12 rounded-xl bg-primary/15 items-center justify-center">
+        <Icon size={24} color="#EEC234" strokeWidth={2} />
+      </View>
       <View>
         <Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
           {titulo}
         </Text>
-        <Text className="text-sm text-muted-foreground dark:text-muted-dark-foreground mt-1">
+        <Text className="text-sm text-muted-foreground dark:text-muted-dark-foreground mt-1 leading-5">
           {descripcion}
         </Text>
       </View>
-      <Text className="text-primary font-semibold text-sm">Continuar →</Text>
+      <View className="flex-row items-center gap-1">
+        <Text className="text-primary font-semibold text-sm">Continuar</Text>
+        <ChevronRight size={16} color="#EEC234" strokeWidth={2.25} />
+      </View>
     </Pressable>
   );
 }
@@ -212,8 +218,8 @@ function FormWrapper({
       keyboardShouldPersistTaps="handled"
       className="px-6"
     >
-      <Pressable onPress={onBack} className="flex-row items-center gap-2 mb-6">
-        <Text className="text-primary text-base">←</Text>
+      <Pressable onPress={onBack} className="flex-row items-center gap-1 mb-6 self-start">
+        <ChevronLeft size={18} color="#EEC234" strokeWidth={2.25} />
         <Text className="text-primary font-medium">Elegir rol</Text>
       </Pressable>
 
@@ -266,12 +272,12 @@ export default function RegistroScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-6">
-        <Pressable onPress={() => router.back()} className="flex-row items-center gap-2 mt-4 mb-8">
-          <Text className="text-primary text-base">←</Text>
+        <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 mt-4 mb-8 self-start">
+          <ChevronLeft size={18} color="#EEC234" strokeWidth={2.25} />
           <Text className="text-primary font-medium">Volver al login</Text>
         </Pressable>
 
-        <Text className="text-3xl font-bold text-foreground dark:text-foreground-dark mb-2">
+        <Text className="text-3xl font-bold text-foreground dark:text-foreground-dark mb-2 tracking-tight">
           Crear cuenta
         </Text>
         <Text className="text-muted-foreground dark:text-muted-dark-foreground mb-8 text-base">
@@ -280,13 +286,13 @@ export default function RegistroScreen() {
 
         <View className="gap-4">
           <RolCard
-            emoji="🛒"
+            Icon={ShoppingBag}
             titulo="Soy cliente"
             descripcion="Pedí lo que necesitás de cualquier comercio de la ciudad."
             onPress={() => setRol('CLIENTE')}
           />
           <RolCard
-            emoji="🛵"
+            Icon={Bike}
             titulo="Soy repartidor"
             descripcion="Ganá dinero haciendo envíos en tu zona a tu propio ritmo."
             onPress={() => setRol('REPARTIDOR')}

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
+import { Bike } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -41,8 +42,8 @@ export default function LoginScreen() {
         >
           {/* Marca */}
           <View className="items-center mb-10 mt-8">
-            <View className="w-16 h-16 rounded-2xl bg-primary items-center justify-center mb-4">
-              <Text className="text-4xl">🛵</Text>
+            <View className="w-16 h-16 rounded-2xl bg-primary items-center justify-center mb-4 shadow-sm shadow-foreground/10">
+              <Bike size={32} color="#251E14" strokeWidth={2.25} />
             </View>
             <Text className="text-3xl font-bold text-foreground dark:text-foreground-dark tracking-tight">
               DeliverYa

@@ -1,16 +1,24 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
+import { ClipboardList, History, Home, User, type LucideIcon } from 'lucide-react-native';
 import { View, useColorScheme } from 'react-native';
 
-type IconName = React.ComponentProps<typeof Ionicons>['name'];
-
-function TabIcon({ name, color, focused }: { name: IconName; color: string; focused: boolean }) {
+function TabIcon({
+  Icon,
+  color,
+  focused,
+}: {
+  Icon: LucideIcon;
+  color: string;
+  focused: boolean;
+}) {
   return (
-    <View style={[
-      { width: 52, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-      focused && { backgroundColor: 'rgba(238, 194, 52, 0.15)' },
-    ]}>
-      <Ionicons name={name} size={24} color={color} />
+    <View
+      style={[
+        { width: 52, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+        focused && { backgroundColor: 'rgba(238, 194, 52, 0.18)' },
+      ]}
+    >
+      <Icon size={20} color={color} strokeWidth={focused ? 2.4 : 2} />
     </View>
   );
 }
@@ -36,28 +44,28 @@ export default function ClienteTabsLayout() {
         name="index"
         options={{
           title: 'Inicio',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="home-outline" color={color} focused={focused} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon Icon={Home} color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="pedidos"
         options={{
           title: 'Pedidos',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="receipt-outline" color={color} focused={focused} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon Icon={ClipboardList} color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="historial"
         options={{
           title: 'Historial',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="speedometer-outline" color={color} focused={focused} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon Icon={History} color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color, focused }) => <TabIcon name="person-outline" color={color} focused={focused} />,
+          tabBarIcon: ({ color, focused }) => <TabIcon Icon={User} color={color} focused={focused} />,
         }}
       />
     </Tabs>

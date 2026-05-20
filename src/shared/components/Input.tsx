@@ -19,7 +19,7 @@ export function Input({ label, error, className = '', ...props }: InputProps) {
         </Text>
       )}
       <TextInput
-        className={`rounded-lg border px-4 py-3 text-base text-foreground dark:text-foreground-dark bg-input dark:bg-input-dark ${borderClass} ${className}`}
+        className={`rounded-lg border px-4 py-3 text-base text-foreground dark:text-foreground-dark bg-card dark:bg-card-dark ${borderClass} ${className}`}
         placeholderTextColor="#9E9891"
         {...props}
       />

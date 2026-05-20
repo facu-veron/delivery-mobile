@@ -1,5 +1,6 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { Home, MapPin, User } from 'lucide-react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AccionesPedido } from '@/features/pedidos/components/AccionesPedido';
@@ -8,6 +9,7 @@ import { usePedidoDetalle } from '@/features/pedidos/hooks/usePedidoDetalle';
 import { Card } from '@/shared/components/Card';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { ScreenHeader } from '@/shared/components/ScreenHeader';
 import { formatARS, formatDateTime } from '@/shared/lib/formatters';
 import { TipoPedido } from '@/shared/types/pedido.types';
 
@@ -20,43 +22,73 @@ function Fila({ label, value }: { label: string; value: string }) {
   );
 }
 
+function FilaConIcono({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <View className="py-2 border-b border-border dark:border-border-dark last:border-0">
+      <View className="flex-row items-center gap-1.5">
+        {icon}
+        <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">{label}</Text>
+      </View>
+      <Text className="text-sm font-medium text-foreground dark:text-foreground-dark mt-0.5 ml-5">
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 export default function PedidoDetalleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const { data: pedido, isLoading, isError } = usePedidoDetalle(id);
 
   if (isLoading) return <LoadingSpinner />;
   if (isError || !pedido) return <ErrorMessage message="No se pudo cargar el pedido." />;
 
   const esLibre = pedido.tipo === TipoPedido.LIBRE;
+  const titulo = esLibre
+    ? pedido.localNombre ?? 'Pedido libre'
+    : pedido.comercio?.nombre ?? 'Pedido catálogo';
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
-      {/* Header */}
-      <View className="flex-row items-center gap-3 px-4 pt-4 pb-2">
-        <Pressable onPress={() => router.back()} className="p-2">
-          <Text className="text-primary text-lg">←</Text>
-        </Pressable>
-        <Text className="flex-1 text-xl font-bold text-foreground dark:text-foreground-dark">
-          {esLibre ? pedido.localNombre ?? 'Pedido libre' : pedido.comercio?.nombre ?? 'Pedido catálogo'}
-        </Text>
-        <EstadoBadge estado={pedido.estado} />
-      </View>
+      <ScreenHeader
+        title={titulo}
+        right={<EstadoBadge estado={pedido.estado} />}
+      />
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
         {/* Direcciones */}
         <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-2">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
             Direcciones
           </Text>
-          <Fila label="📍 Retirar en" value={pedido.localDireccion} />
-          <Fila label="🏠 Entregar en" value={pedido.clienteDireccion} />
-          <Fila label="👤 Cliente" value={`${pedido.cliente.nombre} · ${pedido.cliente.telefono}`} />
+          <FilaConIcono
+            icon={<MapPin size={13} color="#6A6052" strokeWidth={2} />}
+            label="Retirar en"
+            value={pedido.localDireccion}
+          />
+          <FilaConIcono
+            icon={<Home size={13} color="#6A6052" strokeWidth={2} />}
+            label="Entregar en"
+            value={pedido.clienteDireccion}
+          />
+          <FilaConIcono
+            icon={<User size={13} color="#6A6052" strokeWidth={2} />}
+            label="Cliente"
+            value={`${pedido.cliente.nombre} · ${pedido.cliente.telefono}`}
+          />
         </Card>
 
         {/* Detalle del pedido */}
         <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-2">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
             {esLibre ? 'Producto' : 'Items del pedido'}
           </Text>
 
@@ -86,7 +118,7 @@ export default function PedidoDetalleScreen() {
 
         {/* Montos */}
         <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-2">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
             Resumen de montos
           </Text>
           <Fila label="Costo de envío" value={formatARS(pedido.costoEnvio)} />

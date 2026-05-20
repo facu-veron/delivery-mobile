@@ -32,5 +32,5 @@ interface EstadoBadgeProps {
 }
 
 export function EstadoBadge({ estado }: EstadoBadgeProps) {
-  return <Badge variant={variantMap[estado]}>{labelMap[estado]}</Badge>;
+  return <Badge variant={variantMap[estado]} dot>{labelMap[estado]}</Badge>;
 }

@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, Text } from 'react-native';
 
-type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'outline' | 'destructive' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -10,19 +10,23 @@ interface ButtonProps {
   size?: Size;
   loading?: boolean;
   disabled?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   className?: string;
 }
 
 const containerClasses: Record<Variant, string> = {
-  primary:     'bg-primary active:opacity-75',
-  secondary:   'bg-secondary border border-border active:opacity-75',
-  destructive: 'bg-destructive active:opacity-75',
-  ghost:       'bg-transparent active:bg-muted',
+  primary:     'bg-primary active:opacity-80 shadow-sm',
+  secondary:   'bg-secondary dark:bg-secondary-dark active:opacity-80',
+  outline:     'bg-transparent border border-border dark:border-border-dark active:bg-muted dark:active:bg-muted-dark',
+  destructive: 'bg-destructive active:opacity-80 shadow-sm',
+  ghost:       'bg-transparent active:bg-muted dark:active:bg-muted-dark',
 };
 
 const labelClasses: Record<Variant, string> = {
   primary:     'text-primary-foreground',
-  secondary:   'text-secondary-foreground',
+  secondary:   'text-secondary-foreground dark:text-secondary-dark-foreground',
+  outline:     'text-foreground dark:text-foreground-dark',
   destructive: 'text-destructive-foreground',
   ghost:       'text-foreground dark:text-foreground-dark',
 };
@@ -36,7 +40,7 @@ const sizeContainerClasses: Record<Size, string> = {
 const sizeLabelClasses: Record<Size, string> = {
   sm: 'text-sm font-medium',
   md: 'text-base font-semibold',
-  lg: 'text-lg font-semibold',
+  lg: 'text-base font-semibold',
 };
 
 export function Button({
@@ -46,6 +50,8 @@ export function Button({
   size = 'md',
   loading = false,
   disabled = false,
+  leftIcon,
+  rightIcon,
   className = '',
 }: ButtonProps) {
   const isDisabled = disabled || loading;
@@ -56,15 +62,18 @@ export function Button({
       disabled={isDisabled}
       className={`flex-row items-center justify-center ${containerClasses[variant]} ${sizeContainerClasses[size]} ${isDisabled ? 'opacity-50' : ''} ${className}`}
     >
-      {loading && (
+      {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' ? '#251E14' : '#EEC234'}
+          color={variant === 'primary' || variant === 'destructive' ? '#251E14' : '#EEC234'}
         />
+      ) : (
+        leftIcon
       )}
       <Text className={`${labelClasses[variant]} ${sizeLabelClasses[size]}`}>
         {children}
       </Text>
+      {!loading && rightIcon}
     </Pressable>
   );
 }

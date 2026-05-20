@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ShoppingBag } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,6 +8,7 @@ import { useComercio } from '@/features/cliente/hooks/useComercio';
 import { useCarritoStore } from '@/features/cliente/store/carrito.store';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { ScreenHeader } from '@/shared/components/ScreenHeader';
 import { formatARS } from '@/shared/lib/formatters';
 import { Producto } from '@/shared/types/comercio.types';
 
@@ -27,28 +29,15 @@ export default function ComercioScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
-      {/* Header */}
-      <View className="flex-row items-center gap-3 px-4 pt-4 pb-2">
-        <Pressable onPress={() => router.back()} className="p-2">
-          <Text className="text-primary text-lg">←</Text>
-        </Pressable>
-        <View className="flex-1">
-          <Text className="text-xl font-bold text-foreground dark:text-foreground-dark">
-            {comercio.nombre}
-          </Text>
-          <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">
-            📍 {comercio.direccion}
-          </Text>
-        </View>
-      </View>
+      <ScreenHeader title={comercio.nombre} subtitle={comercio.direccion} />
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100, gap: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 110, gap: 16 }}>
         {comercio.categorias.map((categoria) => (
-          <View key={categoria.id}>
-            <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-1">
+          <View key={categoria.id} className="gap-2">
+            <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider">
               {categoria.nombre}
             </Text>
-            <View className="bg-card dark:bg-card-dark rounded-xl px-4 border border-border dark:border-border-dark">
+            <View className="bg-card dark:bg-card-dark rounded-xl px-4 border border-border dark:border-border-dark shadow-sm shadow-foreground/5">
               {categoria.productos.map((producto: Producto) => (
                 <ProductoCard
                   key={producto.id}
@@ -68,10 +57,15 @@ export default function ComercioScreen() {
         <View className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-2 bg-background dark:bg-background-dark border-t border-border dark:border-border-dark">
           <Pressable
             onPress={() => router.push('/(cliente)/carrito' as any)}
-            className="bg-primary rounded-xl py-4 flex-row items-center justify-between px-5 active:opacity-80"
+            className="bg-primary rounded-2xl py-4 px-4 flex-row items-center justify-between active:opacity-90 shadow-sm shadow-foreground/10"
           >
-            <View className="bg-primary-foreground/20 rounded-lg px-2 py-0.5">
-              <Text className="text-xs font-bold text-primary-foreground">{totalItems}</Text>
+            <View className="flex-row items-center gap-2">
+              <View className="w-7 h-7 rounded-lg bg-primary-foreground/15 items-center justify-center">
+                <ShoppingBag size={15} color="#251E14" strokeWidth={2.25} />
+              </View>
+              <View className="bg-primary-foreground/15 rounded-full px-2 py-0.5">
+                <Text className="text-xs font-bold text-primary-foreground">{totalItems}</Text>
+              </View>
             </View>
             <Text className="text-sm font-bold text-primary-foreground">Ver carrito</Text>
             <Text className="text-sm font-bold text-primary-foreground">

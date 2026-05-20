@@ -1,5 +1,6 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { Home, MapPin } from 'lucide-react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { usePedidoCliente } from '@/features/cliente/hooks/usePedidoCliente';
@@ -7,6 +8,7 @@ import { EstadoBadge } from '@/features/pedidos/components/EstadoBadge';
 import { Card } from '@/shared/components/Card';
 import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { ScreenHeader } from '@/shared/components/ScreenHeader';
 import { formatARS, formatDateTime } from '@/shared/lib/formatters';
 import { EstadoPedido, TipoPedido } from '@/shared/types/pedido.types';
 
@@ -58,9 +60,30 @@ function Fila({ label, value }: { label: string; value: string }) {
   );
 }
 
+function FilaConIcono({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <View className="py-2 border-b border-border dark:border-border-dark last:border-0">
+      <View className="flex-row items-center gap-1.5">
+        {icon}
+        <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">{label}</Text>
+      </View>
+      <Text className="text-sm font-medium text-foreground dark:text-foreground-dark mt-0.5 ml-5">
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 export default function PedidoClienteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const { data: pedido, isLoading, isError } = usePedidoCliente(id);
 
   if (isLoading) return <LoadingSpinner />;
@@ -73,28 +96,27 @@ export default function PedidoClienteScreen() {
     pedido.estado === EstadoPedido.CANCELADO ||
     pedido.estado === EstadoPedido.CANCELADO_PRECIO;
 
+  const titulo = esLibre
+    ? pedido.localNombre ?? 'Pedido libre'
+    : pedido.comercio?.nombre ?? 'Tu pedido';
+
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
-      <View className="flex-row items-center gap-3 px-4 pt-4 pb-2">
-        <Pressable onPress={() => router.back()} className="p-2">
-          <Text className="text-primary text-lg">←</Text>
-        </Pressable>
-        <Text className="flex-1 text-xl font-bold text-foreground dark:text-foreground-dark">
-          {esLibre ? pedido.localNombre ?? 'Pedido libre' : pedido.comercio?.nombre ?? 'Tu pedido'}
-        </Text>
-        <EstadoBadge estado={pedido.estado} />
-      </View>
+      <ScreenHeader
+        title={titulo}
+        right={<EstadoBadge estado={pedido.estado} />}
+      />
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
         {/* Estado actual */}
         {paso && (
           <View
-            className={`rounded-xl p-4 ${
+            className={`rounded-xl p-4 border ${
               entregado
-                ? 'bg-success-light dark:bg-success-dark-light'
+                ? 'bg-success-light dark:bg-success-dark-light border-success/20'
                 : cancelado
-                ? 'bg-destructive-light dark:bg-destructive-dark-light'
-                : 'bg-warning-light dark:bg-warning-dark-light'
+                ? 'bg-destructive-light dark:bg-destructive-dark-light border-destructive/20'
+                : 'bg-warning-light dark:bg-warning-dark-light border-warning/20'
             }`}
           >
             <Text
@@ -109,12 +131,12 @@ export default function PedidoClienteScreen() {
               {paso.label}
             </Text>
             <Text
-              className={`text-xs ${
+              className={`text-xs leading-5 ${
                 entregado
                   ? 'text-success dark:text-success-dark'
                   : cancelado
                   ? 'text-destructive dark:text-destructive-dark'
-                  : 'text-warning-foreground dark:text-warning-dark-foreground'
+                  : 'text-warning dark:text-warning-dark'
               }`}
             >
               {paso.descripcion}
@@ -124,16 +146,24 @@ export default function PedidoClienteScreen() {
 
         {/* Dirección */}
         <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-2">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
             Detalles
           </Text>
-          <Fila label="📍 Retiran en" value={pedido.localDireccion} />
-          <Fila label="🏠 Te entregan en" value={pedido.clienteDireccion} />
+          <FilaConIcono
+            icon={<MapPin size={13} color="#6A6052" strokeWidth={2} />}
+            label="Retiran en"
+            value={pedido.localDireccion}
+          />
+          <FilaConIcono
+            icon={<Home size={13} color="#6A6052" strokeWidth={2} />}
+            label="Te entregan en"
+            value={pedido.clienteDireccion}
+          />
         </Card>
 
         {/* Contenido del pedido */}
         <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-2">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
             {esLibre ? 'Producto' : 'Items'}
           </Text>
           {esLibre ? (
@@ -162,7 +192,7 @@ export default function PedidoClienteScreen() {
 
         {/* Montos */}
         <Card>
-          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wide mb-2">
+          <Text className="text-xs font-semibold text-muted-foreground dark:text-muted-dark-foreground uppercase tracking-wider mb-2">
             Resumen
           </Text>
           <Fila label="Costo de envío" value={formatARS(pedido.costoEnvio)} />

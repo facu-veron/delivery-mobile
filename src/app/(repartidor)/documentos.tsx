@@ -1,13 +1,15 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { Camera, Upload } from 'lucide-react-native';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DocumentoRepartidor } from '@/features/repartidor/api/repartidor.api';
 import { useDocumentos } from '@/features/repartidor/hooks/useDocumentos';
 import { useSubirDocumento } from '@/features/repartidor/hooks/useSubirDocumento';
+import { Badge } from '@/shared/components/Badge';
 import { Card } from '@/shared/components/Card';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { ScreenHeader } from '@/shared/components/ScreenHeader';
 import { EstadoDocumento } from '@/shared/types/pedido.types';
 
 const DOCUMENTOS_LABELS: Record<string, string> = {
@@ -20,10 +22,16 @@ const DOCUMENTOS_LABELS: Record<string, string> = {
 
 const DOCUMENTOS_KEYS = Object.keys(DOCUMENTOS_LABELS);
 
-const estadoStyle: Record<EstadoDocumento, { label: string; className: string }> = {
-  [EstadoDocumento.PENDIENTE]:  { label: 'Pendiente',  className: 'text-warning dark:text-warning-dark' },
-  [EstadoDocumento.APROBADO]:   { label: 'Aprobado',   className: 'text-success dark:text-success-dark' },
-  [EstadoDocumento.RECHAZADO]:  { label: 'Rechazado',  className: 'text-destructive dark:text-destructive-dark' },
+const estadoVariant: Record<EstadoDocumento, 'warning' | 'success' | 'destructive'> = {
+  [EstadoDocumento.PENDIENTE]: 'warning',
+  [EstadoDocumento.APROBADO]:  'success',
+  [EstadoDocumento.RECHAZADO]: 'destructive',
+};
+
+const estadoLabel: Record<EstadoDocumento, string> = {
+  [EstadoDocumento.PENDIENTE]: 'Pendiente',
+  [EstadoDocumento.APROBADO]:  'Aprobado',
+  [EstadoDocumento.RECHAZADO]: 'Rechazado',
 };
 
 interface DocumentoRowProps {
@@ -34,31 +42,35 @@ interface DocumentoRowProps {
 
 function DocumentoRow({ doc, onSubir, uploading }: DocumentoRowProps) {
   const label = DOCUMENTOS_LABELS[doc.key] ?? doc.key;
-  const style = estadoStyle[doc.estado];
 
   return (
-    <Card className="flex-col gap-1">
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1 mr-3">
-          <Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+    <Card className="gap-2">
+      <View className="flex-row items-center justify-between gap-3">
+        <View className="flex-1">
+          <Text className="text-sm font-semibold text-foreground dark:text-foreground-dark">
             {label}
           </Text>
-          <Text className={`text-xs mt-0.5 ${style.className}`}>{style.label}</Text>
+          <View className="mt-1.5">
+            <Badge variant={estadoVariant[doc.estado]} dot>
+              {estadoLabel[doc.estado]}
+            </Badge>
+          </View>
         </View>
         {doc.estado !== EstadoDocumento.APROBADO && (
           <Pressable
-            className="bg-secondary dark:bg-secondary-dark px-3 py-1.5 rounded-lg active:opacity-75 disabled:opacity-50"
+            className="flex-row items-center gap-1.5 bg-secondary dark:bg-secondary-dark px-3 py-2 rounded-lg active:opacity-75 disabled:opacity-50"
             onPress={() => onSubir(doc.key)}
             disabled={uploading}
           >
-            <Text className="text-xs font-medium text-primary">
+            <Upload size={14} color="#EEC234" strokeWidth={2.25} />
+            <Text className="text-xs font-semibold text-primary">
               {doc.estado === EstadoDocumento.RECHAZADO ? 'Subir nuevo' : 'Subir'}
             </Text>
           </Pressable>
         )}
       </View>
       {doc.estado === EstadoDocumento.RECHAZADO && doc.motivoRechazo && (
-        <Text className="text-xs text-destructive dark:text-destructive-dark">
+        <Text className="text-xs text-destructive dark:text-destructive-dark mt-0.5">
           Motivo: {doc.motivoRechazo}
         </Text>
       )}
@@ -67,7 +79,6 @@ function DocumentoRow({ doc, onSubir, uploading }: DocumentoRowProps) {
 }
 
 export default function DocumentosScreen() {
-  const router = useRouter();
   const { data: documentos, isLoading } = useDocumentos();
   const { mutate: subir, isPending } = useSubirDocumento();
 
@@ -105,22 +116,18 @@ export default function DocumentosScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
-      <View className="flex-row items-center gap-3 px-4 pt-4 pb-2">
-        <Pressable onPress={() => router.back()} className="p-2">
-          <Text className="text-primary text-lg">←</Text>
-        </Pressable>
-        <Text className="flex-1 text-xl font-bold text-foreground dark:text-foreground-dark">
-          Mis documentos
-        </Text>
-      </View>
+      <ScreenHeader title="Mis documentos" />
 
       {isLoading ? (
         <LoadingSpinner />
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
-          <Text className="text-sm text-muted-foreground dark:text-muted-dark-foreground">
-            Todos los documentos deben ser aprobados por el equipo antes de poder recibir pedidos.
-          </Text>
+          <View className="flex-row items-start gap-2.5 bg-warning-light dark:bg-warning-dark-light border border-warning/20 rounded-xl p-3.5">
+            <Camera size={18} color="#DFB030" strokeWidth={2} />
+            <Text className="flex-1 text-xs text-warning dark:text-warning-dark leading-5">
+              Todos los documentos deben ser aprobados por el equipo antes de poder recibir pedidos.
+            </Text>
+          </View>
 
           {docsList.map((doc) => (
             <DocumentoRow
