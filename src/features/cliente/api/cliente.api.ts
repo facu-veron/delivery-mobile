@@ -24,37 +24,37 @@ export interface CrearPedidoCatalogoDto {
 
 export const clienteApi = {
   getComercios: async (): Promise<Comercio[]> => {
-    const { data } = await apiClient.get<Comercio[]>('/comercios');
+    const { data } = await apiClient.get<Comercio[]>('/api/comercios');
     return data;
   },
 
   getComercioDetalle: async (id: string): Promise<ComercioDetalle> => {
-    const { data } = await apiClient.get<ComercioDetalle>(`/comercios/${id}`);
+    const { data } = await apiClient.get<ComercioDetalle>(`/api/comercios/${id}`);
     return data;
   },
 
   getPedidosActivos: async (): Promise<Pedido[]> => {
-    const { data } = await apiClient.get<Pedido[]>('/pedidos/mis-pedidos/activos');
+    const { data } = await apiClient.get<Pedido[]>('/api/pedidos/mis-pedidos/activos');
     return data;
   },
 
   getPedidoDetalle: async (id: string): Promise<Pedido> => {
-    const { data } = await apiClient.get<Pedido>(`/pedidos/${id}`);
+    const { data } = await apiClient.get<Pedido>(`/api/pedidos/${id}`);
     return data;
   },
 
   crearPedidoLibre: async (dto: CrearPedidoLibreDto): Promise<Pedido> => {
-    const { data } = await apiClient.post<Pedido>('/pedidos/libre', dto);
+    const { data } = await apiClient.post<Pedido>('/api/pedidos/libre', dto);
     return data;
   },
 
   crearPedidoCatalogo: async (dto: CrearPedidoCatalogoDto): Promise<Pedido> => {
-    const { data } = await apiClient.post<Pedido>('/pedidos/catalogo', dto);
+    const { data } = await apiClient.post<Pedido>('/api/pedidos/catalogo', dto);
     return data;
   },
 
   getHistorial: async (): Promise<Pedido[]> => {
-    const { data } = await apiClient.get<Pedido[]>('/pedidos/mis-pedidos/historial');
+    const { data } = await apiClient.get<Pedido[]>('/api/pedidos/mis-pedidos/historial');
     return data;
   },
 

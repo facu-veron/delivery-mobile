@@ -31,13 +31,17 @@ import { EstadoAprobacion } from '@/shared/types/pedido.types';
 const aprobacionVariant = {
   [EstadoAprobacion.APROBADO]: 'success',
   [EstadoAprobacion.PENDIENTE]: 'warning',
+  [EstadoAprobacion.PENDIENTE_REVISION]: 'warning',
   [EstadoAprobacion.RECHAZADO]: 'destructive',
+  [EstadoAprobacion.SUSPENDIDO]: 'destructive',
 } as const;
 
 const aprobacionLabel = {
   [EstadoAprobacion.APROBADO]: 'Aprobado',
   [EstadoAprobacion.PENDIENTE]: 'Pendiente',
+  [EstadoAprobacion.PENDIENTE_REVISION]: 'En revisión',
   [EstadoAprobacion.RECHAZADO]: 'Rechazado',
+  [EstadoAprobacion.SUSPENDIDO]: 'Suspendido',
 };
 
 function NoImplementadoAlert(feature: string) {
@@ -109,7 +113,7 @@ export default function PerfilScreen() {
           <ProfileQuickAction
             icon={Star}
             label="Calificaciones"
-            onPress={() => router.push('/(repartidor)/ganancias' as any)}
+            onPress={() => router.push('/(repartidor)/calificaciones' as any)}
           />
           <ProfileQuickAction
             icon={CircleHelp}
@@ -134,7 +138,7 @@ export default function PerfilScreen() {
           <ProfileListItem
             icon={Lock}
             label="Cambiar contraseña"
-            onPress={NoImplementadoAlert('cambiar password')}
+            onPress={() => router.push('/(repartidor)/cambiar-password' as any)}
           />
         </ProfileSection>
 
@@ -149,6 +153,7 @@ export default function PerfilScreen() {
           <ProfileListItem
             icon={MapPin}
             label="Zona de trabajo"
+            description={perfil.zonaNombre ?? 'Sin zona asignada'}
             onPress={NoImplementadoAlert('zona')}
           />
           <ProfileListItem

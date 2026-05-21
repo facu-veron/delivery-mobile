@@ -1,4 +1,4 @@
-import { Bell, CheckCheck, Package, ShoppingBag, Star, Truck, XCircle } from 'lucide-react-native';
+import { Bell, CheckCheck, ChevronRight, Package, ShoppingBag, Truck, XCircle } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,9 +7,11 @@ import { Card } from '@/shared/components/Card';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenHeader } from '@/shared/components/ScreenHeader';
-import { useMarcarTodasLeidas, useNotificaciones } from '@/shared/hooks/useNotificaciones';
+import { useAuthStore } from '@/features/auth/store/auth.store';
+import { useMarcarLeida, useMarcarTodasLeidas, useNotificaciones } from '@/shared/hooks/useNotificaciones';
 import { formatDateTime } from '@/shared/lib/formatters';
-import { Notificacion, TipoNotificacion } from '@/shared/types/pedido.types';
+import { Notificacion, RolUsuario, TipoNotificacion } from '@/shared/types/pedido.types';
+import { useRouter } from 'expo-router';
 
 const TIPO_ICON: Record<TipoNotificacion, LucideIcon> = {
   [TipoNotificacion.NUEVO_PEDIDO]: ShoppingBag,
@@ -31,11 +33,18 @@ const TIPO_COLOR: Record<TipoNotificacion, string> = {
   [TipoNotificacion.SISTEMA]: '#6A6052',
 };
 
-function NotificacionItem({ item }: { item: Notificacion }) {
+function NotificacionItem({
+  item,
+  onPress,
+}: {
+  item: Notificacion;
+  onPress?: () => void;
+}) {
   const Icon = TIPO_ICON[item.tipo] ?? Bell;
   const color = TIPO_COLOR[item.tipo] ?? '#6A6052';
+  const tappable = !!onPress;
 
-  return (
+  const content = (
     <View
       className={`flex-row gap-3 py-3 border-b border-border dark:border-border-dark last:border-0 ${
         !item.leida ? 'opacity-100' : 'opacity-60'
@@ -63,13 +72,32 @@ function NotificacionItem({ item }: { item: Notificacion }) {
           {formatDateTime(item.creadoEn)}
         </Text>
       </View>
+      {tappable && (
+        <View className="justify-center">
+          <ChevronRight size={14} color="#6A6052" strokeWidth={2} />
+        </View>
+      )}
     </View>
   );
+
+  if (tappable) {
+    return (
+      <Pressable onPress={onPress} className="active:opacity-70">
+        {content}
+      </Pressable>
+    );
+  }
+  return content;
 }
 
 export function NotificacionesScreen() {
+  const router = useRouter();
+  const { rol } = useAuthStore();
   const { data, isLoading } = useNotificaciones();
   const { mutate: marcarTodas, isPending } = useMarcarTodasLeidas();
+  const { mutate: marcarLeida } = useMarcarLeida();
+
+  const pedidoBase = rol === RolUsuario.REPARTIDOR ? '/(repartidor)/pedido' : '/(cliente)/pedido';
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
@@ -102,9 +130,16 @@ export function NotificacionesScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Card className="gap-0">
-            {data.items.map((item) => (
-              <NotificacionItem key={item.id} item={item} />
-            ))}
+            {data.items.map((item) => {
+              const pedidoId = item.data?.pedidoId;
+              const onPress = pedidoId
+                ? () => {
+                    if (!item.leida) marcarLeida(item.id);
+                    router.push(`${pedidoBase}/${pedidoId}` as any);
+                  }
+                : undefined;
+              return <NotificacionItem key={item.id} item={item} onPress={onPress} />;
+            })}
           </Card>
           {data.total > data.items.length && (
             <Text className="text-xs text-center text-muted-foreground dark:text-muted-dark-foreground mt-3">

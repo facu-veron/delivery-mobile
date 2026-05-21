@@ -23,6 +23,9 @@ interface Options {
 export function usePedidoSSE(pedidoId: string, { queryKey, estado }: Options) {
   const qc = useQueryClient();
   const esRef = useRef<EventSource | null>(null);
+  // Stable ref so the effect doesn't re-run when an inline queryKey array changes reference
+  const queryKeyRef = useRef(queryKey);
+  queryKeyRef.current = queryKey;
 
   useEffect(() => {
     if (!pedidoId || !estado || esPedidoTerminado(estado)) {
@@ -44,7 +47,7 @@ export function usePedidoSSE(pedidoId: string, { queryKey, estado }: Options) {
       });
 
       es.addEventListener('estado_actualizado', () => {
-        qc.invalidateQueries({ queryKey });
+        qc.invalidateQueries({ queryKey: queryKeyRef.current });
       });
 
       es.addEventListener('error', () => {
@@ -61,5 +64,5 @@ export function usePedidoSSE(pedidoId: string, { queryKey, estado }: Options) {
       esRef.current?.close();
       esRef.current = null;
     };
-  }, [pedidoId, estado, qc, queryKey]);
+  }, [pedidoId, estado, qc]);
 }

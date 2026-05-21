@@ -118,7 +118,7 @@ export default function ClientePerfilScreen() {
           <ProfileListItem
             icon={Lock}
             label="Cambiar contraseña"
-            onPress={NoImplementadoAlert('cambiar password')}
+            onPress={() => router.push('/(cliente)/cambiar-password' as any)}
           />
           <ProfileListItem
             icon={Bell}

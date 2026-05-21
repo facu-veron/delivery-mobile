@@ -46,8 +46,10 @@ export type EstadoRepartidor = DisponibilidadRepartidor;
 
 export enum EstadoAprobacion {
   PENDIENTE = 'PENDIENTE',
+  PENDIENTE_REVISION = 'PENDIENTE_REVISION',
   APROBADO = 'APROBADO',
   RECHAZADO = 'RECHAZADO',
+  SUSPENDIDO = 'SUSPENDIDO',
 }
 
 // ─── API response shapes ────────────────────────────────────────────────────
@@ -98,9 +100,23 @@ export interface Notificacion {
   tipo: TipoNotificacion;
   titulo: string;
   cuerpo: string;
-  data?: Record<string, string>;
+  data: Record<string, string> | null;
   leida: boolean;
   creadoEn: string;
+}
+
+export interface CalificacionRecibida {
+  id: string;
+  puntaje: number;
+  comentario: string | null;
+  fecha: string;
+  clienteNombre: string;
+}
+
+export interface CalificacionesRepartidorResponse {
+  promedio: number;
+  total: number;
+  ultimas: CalificacionRecibida[];
 }
 
 export interface NotificacionesResponse {
@@ -129,6 +145,7 @@ export interface Repartidor {
   /** Disponibilidad actual del repartidor — DISPONIBLE/NO_DISPONIBLE/EN_PEDIDO */
   disponibilidad: DisponibilidadRepartidor;
   zonaId: string;
+  zonaNombre?: string;
   calificacionProm: number;
   totalEntregas: number;
   documentos: DocumentoRepartidor[];

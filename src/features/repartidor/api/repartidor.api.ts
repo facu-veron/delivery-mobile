@@ -1,5 +1,6 @@
 import { apiClient } from '@/shared/api/client';
 import type {
+  CalificacionesRepartidorResponse,
   DocumentoRepartidor,
   EstadisticasRepartidor,
   GananciasResponse,
@@ -45,4 +46,7 @@ export const repartidorApi = {
 
   getGanancias: (params?: { desde?: string; hasta?: string }) =>
     apiClient.get<GananciasResponse>('/api/repartidor/ganancias', { params }),
+
+  getCalificaciones: () =>
+    apiClient.get<CalificacionesRepartidorResponse>('/api/repartidor/calificaciones'),
 };

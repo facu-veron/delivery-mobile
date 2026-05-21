@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ChevronRight, ShoppingBag, Store } from 'lucide-react-native';
+import { ChevronRight, ShoppingBag, Store, WifiOff } from 'lucide-react-native';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,8 +7,8 @@ import { useAuthStore } from '@/features/auth/store/auth.store';
 import { ComercioCard } from '@/features/cliente/components/ComercioCard';
 import { useComercios } from '@/features/cliente/hooks/useComercios';
 import { useFavoritos, useToggleFavorito } from '@/features/cliente/hooks/useFavoritos';
+import { Button } from '@/shared/components/Button';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { Avatar } from '@/shared/components/Avatar';
 import { Comercio } from '@/shared/types/comercio.types';
@@ -24,7 +24,31 @@ export default function ClienteHomeScreen() {
   const favoritoIds = new Set((favoritos ?? []).map((f) => f.id));
 
   if (isLoading) return <LoadingSpinner />;
-  if (isError) return <ErrorMessage message="No se pudieron cargar los comercios." />;
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
+        <View className="px-4 pt-4 pb-3">
+          <Text className="text-xs text-muted-foreground dark:text-muted-dark-foreground">
+            Bienvenido de vuelta
+          </Text>
+          <Text className="text-2xl font-bold text-foreground dark:text-foreground-dark tracking-tight">
+            Hola, {firstName}
+          </Text>
+        </View>
+        <EmptyState
+          icon={WifiOff}
+          title="No se pudieron cargar los comercios"
+          description="Verificá tu conexión e intentá de nuevo."
+          action={
+            <Button variant="primary" onPress={() => refetch()}>
+              Reintentar
+            </Button>
+          }
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">

@@ -19,4 +19,7 @@ export const authApi = {
 
   registrarRepartidor: (data: RegistroRepartidorInput) =>
     apiClient.post('/api/registro/repartidor', data),
+
+  cambiarPassword: (dto: { passwordActual: string; passwordNueva: string }) =>
+    apiClient.post('/api/cambiar-password', dto),
 };

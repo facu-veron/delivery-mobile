@@ -2,15 +2,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { ClipboardList, Home } from 'lucide-react-native';
+import { ClipboardList, Home, WifiOff } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { usePedidosActivos } from '@/features/cliente/hooks/usePedidosActivos';
 import { EstadoBadge } from '@/features/pedidos/components/EstadoBadge';
+import { Button } from '@/shared/components/Button';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { ErrorMessage } from '@/shared/components/ErrorMessage';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { formatARS, formatDateTime } from '@/shared/lib/formatters';
 import { Pedido, TipoPedido } from '@/shared/types/pedido.types';
@@ -33,7 +33,28 @@ export default function PedidosClienteScreen() {
   }, [queryClient]);
 
   if (isLoading) return <LoadingSpinner />;
-  if (isError) return <ErrorMessage message="No se pudieron cargar los pedidos." />;
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
+        <View className="px-4 pt-4 pb-3">
+          <Text className="text-2xl font-bold text-foreground dark:text-foreground-dark tracking-tight">
+            Mis pedidos
+          </Text>
+        </View>
+        <EmptyState
+          icon={WifiOff}
+          title="No se pudieron cargar los pedidos"
+          description="Verificá tu conexión e intentá de nuevo."
+          action={
+            <Button variant="primary" onPress={() => refetch()}>
+              Reintentar
+            </Button>
+          }
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
