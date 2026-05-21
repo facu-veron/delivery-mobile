@@ -1,7 +1,8 @@
 # Requisitos backend pendientes — Mobile
 
-> Actualizado: 2026-05-20  
+> Actualizado: 2026-05-20 (post Bloque 5)  
 > Lista consolidada de lo que el frontend necesita del backend y aún no está confirmado/implementado.
+> Los ítems resueltos fueron eliminados.
 
 ---
 
@@ -11,85 +12,78 @@
 
 **Necesitamos:** que el perfil incluya `zonaNombre: string`, o un endpoint `GET /api/zonas/:id` que devuelva `{ id, nombre }`.
 
-**Workaround actual:** no se muestra la zona en la UI.
+**Workaround actual:** la fila "Zona de trabajo" en el perfil está deshabilitada (NoImplementadoAlert).
 
 ---
 
-## 2. Campo `clienteDireccion` en pedidos
+## 2. Campo `clienteDireccion` vs `direccionEntregaId`
 
-**Problema:** los docs de backend dicen que crear pedido acepta `direccionEntregaId`, pero el frontend envía `clienteDireccion` (string libre) y esto actualmente funciona.
+**Problema:** los docs del backend indican que crear un pedido acepta `direccionEntregaId`, pero el frontend actualmente envía `clienteDireccion` (string libre) y funciona.
 
-**Necesitamos confirmación** de si el backend acepta ambos formatos o si debemos migrar a `direccionEntregaId`. Si el backend solo acepta `direccionEntregaId`, el flujo de carrito/pedido-libre debe cambiarse para requerir que el usuario tenga al menos una dirección guardada.
+**Necesitamos confirmación** de si el backend acepta ambos formatos o si debemos migrar.
 
-**Estado actual del frontend:** usa `clienteDireccion` string + selector de direcciones guardadas como atajo (pre-rellena el campo de texto).
+**Estado frontend:** envía `clienteDireccion` string. El `DireccionSelector` pre-rellena ese campo con la dirección guardada seleccionada — no envía IDs.
+
+**Impacto si se migra a `direccionEntregaId`:** el flujo de carrito y pedido-libre deberá requerir una dirección guardada (no se puede escribir texto libre).
 
 ---
 
-## 3. Disponibilidad — formato del body del PATCH
+## 3. Disponibilidad — formato del body PATCH
 
-**Problema:** el frontend envía `{ disponible: boolean }` pero los docs dicen que el endpoint acepta `DISPONIBLE | NO_DISPONIBLE` como string.
-
-**Lo que enviamos hoy:**
+**Lo que enviamos:**
 ```json
 { "disponible": true }
 ```
 
-**Lo que puede esperar el backend:**
+**Lo que puede esperar el backend según docs:**
 ```json
 { "disponibilidad": "DISPONIBLE" }
 ```
 
-**Acción:** confirmar con backend cuál es el contrato exacto y actualizar `repartidor.api.ts` si hace falta.
+**Acción:** confirmar contrato y actualizar `repartidor.api.ts:cambiarDisponibilidad` si hace falta.
 
 ---
 
 ## 4. Cambiar contraseña
 
-**Frontend:** quick action en perfil (repartidor y cliente) — actualmente no implementado.
+**Frontend:** quick action en ambos perfiles — sin implementar.
 
-**Necesitamos:** endpoint para cambio de contraseña autenticado, o confirmar que se usa el flujo SuperTokens de reset vía email.
-
-**Sugerencia:**
+**Opción A — endpoint propio:**
 ```
 POST /api/auth/cambiar-password
 Body: { "passwordActual": string, "passwordNueva": string }
-200 OK | 401 Unauthorized (password actual incorrecta)
+200 OK | 401 Unauthorized
 ```
 
----
-
-## 5. Calificaciones del repartidor
-
-**Frontend:** quick action "Calificaciones" en perfil del repartidor — actualmente sin pantalla.
-
-**Necesitamos** (ya documentado en `docs/features/08-calificaciones.md`):
-- `GET /api/repartidor/calificaciones` — lista de reseñas recibidas
-- Endpoint ya existe según el doc — solo falta la pantalla en el frontend.
-
-**Acción:** implementar `CalificacionesScreen` en el frontend (tarea pendiente de Bloque 4).
+**Opción B:** usar flujo SuperTokens de reset por email (no requiere endpoint nuevo, pero el UX es más incómodo dentro de la app).
 
 ---
 
-## 6. Notificaciones in-app
+## 5. Lista de calificaciones recibidas (repartidor)
 
-**Frontend:** ícono de campana en perfil → sin pantalla.
+**Frontend:** quick action "Calificaciones" actualmente navega a Ganancias (workaround).
 
-**Necesitamos** (ya documentado en `docs/features/09-notificaciones-inapp.md`):
-- `GET /api/notificaciones` — lista paginada
-- `PATCH /api/notificaciones/:id/leer` — marcar como leída
-- Badge counter en el ícono (requiere count no-leídas en la respuesta)
+**Necesitamos:** `GET /api/repartidor/calificaciones` — lista de reseñas recibidas con puntaje, comentario, fecha y nombre del cliente (o anónimo).
 
-**Acción:** implementar en Bloque 4.
+**Cuando esté disponible:** crear `CalificacionesScreen` en `/(repartidor)/calificaciones`.
 
 ---
 
-## 7. Upload avatar — tamaño y formato
+## 6. Upload avatar — restricciones de archivo
 
-**Frontend:** usa `expo-image-picker` → `POST /api/me/avatar` con `multipart/form-data`.
+**Frontend:** `expo-image-picker` → `POST /api/me/avatar` con `multipart/form-data`.
 
-**Necesitamos** que el backend documente:
-- Tamaño máximo aceptado
-- Formatos soportados (JPEG, PNG, WEBP)
-- Si redimensiona automáticamente o el cliente debe hacerlo
+**Falta documentar:**
+- Tamaño máximo (bytes)
+- Formatos aceptados (JPEG / PNG / WEBP)
+- Si el backend redimensiona o el cliente debe hacerlo
 
-**Sin esta info:** el frontend no puede mostrar un error descriptivo si el archivo es rechazado.
+**Sin esta info:** el frontend muestra un error genérico si el archivo es rechazado por tamaño/formato.
+
+---
+
+## 7. Notificaciones in-app — creación automática al enviar push
+
+**Estado actual:** el backend NO crea automáticamente un registro `NotificacionInApp` al enviar una push notification. La pantalla de notificaciones solo mostrará mensajes de contacto de soporte (tipo `SISTEMA`) y lo que el backend genere explícitamente.
+
+**Sugerencia:** en cada llamada a `notifService.enviar(...)`, crear también el registro en `NotificacionInApp`. Esto haría que el historial in-app refleje todas las pushes recibidas.
